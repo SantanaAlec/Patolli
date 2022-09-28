@@ -2,6 +2,7 @@ package patolli;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  *
@@ -13,7 +14,10 @@ public class Patolli {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        game();
+        //game();
+        for (int i = 0; i <= 4; i++) {
+            System.out.println(lanzarDados());
+        }
     }
 
     private static int code;
@@ -23,17 +27,14 @@ public class Patolli {
     private static int budget = 0;
     private static int tokens = 2;
     private static int bet;
-    private boolean die; //True es punto, False es liso
+    private static boolean die; //True es punto, False es liso
 
     /**
-     * Avanzas el numero de puntos que te salgan:
- Si son 5 puntos avanzas 10 casillas 
- Si son 5 lisas pierdes turno y pagas bet 
- Cuando sacas una ficha, le cobras la bet de los jugadores y repites turno
- Si caes en casillas exteriores, repite turno
- Si caes en casillas de triangulo pagas doble bet
+     * Avanzas el numero de puntos que te salgan: Si son 5 puntos avanzas 10
+     * casillas Si son 5 lisas pierdes turno y pagas bet Cuando sacas una ficha,
+     * le cobras la bet de los jugadores y repites turno Si caes en casillas
+     * exteriores, repite turno Si caes en casillas de triangulo pagas doble bet
      */
-
     public static void game() {
         setBudget(100);
         
@@ -54,17 +55,21 @@ public class Patolli {
             }
         }
     }
-
     public static void betting(int apuesta) {
         setBet(apuesta); //betAmount = Integer.parseInt( betInput.getText());
-        
+
         for (Player jugador : players) {
             jugador.setBag(jugador.getBag() - getBet());//Agarrar el budget que ya tenian y restarle la bet 
         }
     }
-    
-    public static void agregarJugador(Player jugador){
+
+    public static void agregarJugador(Player jugador) {
         players.add(jugador);
+    }
+
+    public static boolean lanzarDados() {
+            Random random = new Random();
+            return die = random.nextBoolean();
     }
 
     public static int getBet() {
