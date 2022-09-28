@@ -1,6 +1,5 @@
 package patolli;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -15,9 +14,6 @@ public class Patolli {
      */
     public static void main(String[] args) {
         //game();
-        for (int i = 0; i <= 4; i++) {
-            System.out.println(lanzarDados());
-        }
     }
 
     private static int code;
@@ -27,7 +23,7 @@ public class Patolli {
     private static int budget = 0;
     private static int tokens = 2;
     private static int bet;
-    private static boolean die; //True es punto, False es liso
+    private static boolean[] dice = new boolean[5]; //True es punto, False es liso
 
     /**
      * Avanzas el numero de puntos que te salgan: Si son 5 puntos avanzas 10
@@ -38,11 +34,11 @@ public class Patolli {
     public static void game() {
         setBudget(100);
         
-        Player jugador1 = new Player("Jose", new Color(105, 55, 43), tokens, budget);
-        Player jugador2 = new Player("Alec", Color.BLUE, tokens, budget);
+//        Player jugador1 = new Player("Jose", new Color(105, 55, 43), tokens, budget);
+//        Player jugador2 = new Player("Alec", Color.BLUE, tokens, budget);
         
-        agregarJugador(jugador1);
-        agregarJugador(jugador2);
+//        agregarJugador(jugador1);
+//        agregarJugador(jugador2);
         
         if(players.size() >= 2 && players.size() <= 4){
             //Gráfico
@@ -67,9 +63,19 @@ public class Patolli {
         players.add(jugador);
     }
 
-    public static boolean lanzarDados() {
-            Random random = new Random();
-            return die = random.nextBoolean();
+    private static int lanzarDados(final int throws_) {
+        Random random = new Random();
+        int dadosTrue = 0;
+
+        for (int i = 0; i < throws_; i++) {
+            dice[i] = random.nextBoolean();
+            
+            if (dice[i]) {
+                dadosTrue++;
+            }
+        }
+
+        return dadosTrue;
     }
 
     public static int getBet() {
