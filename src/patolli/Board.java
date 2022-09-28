@@ -26,9 +26,10 @@ public class Board {
     }
 
     private void setBoard() {
-        //total: 56 - triagnle: 16 - exterior: 8 - central: 4
-        final int squares = 5;
-        final int triangles = 2;
+        //total: 52 - triagnle: 16 - exterior: 8 - central: 4
+        final int squares = 3; //Comunes x Lado
+        final int triangles = 2; //Triangulares x Lado
+        final int exteriors = 1; //Exteriores x Lado
 
         for (int index = 0; index < 4; index++) {
             for (int side = 0; side < 2; side++) {
@@ -41,7 +42,7 @@ public class Board {
                 }
 
                 if (side < 1) {
-                    for (int exterior = 0; exterior < 2; exterior++) {
+                    for (int exterior = 0; exterior < exteriors; exterior++) {
                         spaces.add(new ExteriorSpace());
                     }
                 }
