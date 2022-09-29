@@ -123,11 +123,21 @@ public class Game {
             board.moveTokenToPos(prevPos, nextPos);
 
             if (nextSpace instanceof ExteriorSpace) {
-
             } else if (nextSpace instanceof TriangleSpace) {
                 payEveryoneDouble();
                 advanceTurn();
             } else if (nextSpace instanceof CentralSpace) {
+                board.removeTokenAtPos(nextPos);
+                advanceTurn();
+            } else if (nextSpace instanceof SquareSpace) {
+                advanceTurn();
+            }
+        } else {
+            if (nextSpace instanceof TriangleSpace) {
+                advanceTurn();
+            } else if (nextSpace instanceof CentralSpace) {
+                board.removeTokenAtPos(nextPos);
+                board.moveTokenToPos(prevPos, nextPos);
                 advanceTurn();
             } else if (nextSpace instanceof SquareSpace) {
                 advanceTurn();
