@@ -100,6 +100,7 @@ public class Board {
     }
 
     public void removeTokenAtPos(final int pos) {
+        getTokenAtPos(pos).setCurrentPos(-1);
         getSpace(pos).setToken(null);
     }
 
