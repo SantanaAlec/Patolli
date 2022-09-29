@@ -119,8 +119,32 @@ public class Board {
     }
 
     public void moveTokenToPos(final int prevPos, final int nextPos) {
-        insertTokenAtPos(getTokenAtPos(prevPos), nextPos);
+        int newPos = nextPos;
+
+        if (nextPos > getBoardSize()) {
+            newPos = nextPos - getBoardSize();
+        }
+
+        insertTokenAtPos(getTokenAtPos(prevPos), newPos);
         removeTokenAtPos(prevPos);
+    }
+
+    public boolean willTokenFinish(final Token token, final int prevPos, final int nextPos) {
+        final int initialPos = token.getInitialPos();
+
+        if (nextPos > getBoardSize()) {
+            if (nextPos - getBoardSize() >= initialPos) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        if (prevPos < initialPos && nextPos >= initialPos) {
+            return true;
+        }
+
+        return false;
     }
 
     public Space getTokenSpace(final Token token) {

@@ -76,6 +76,14 @@ public class Game {
     }
 
     public void playToken(final Token token) {
+        if (getCurrentPlayer().getBalance() <= 0) {
+            removePlayer(getCurrentPlayer());
+
+            advanceTurn();
+
+            return;
+        }
+
         final int successes = throwCoins(5);
 
         if (successes == 0) {
@@ -86,11 +94,16 @@ public class Game {
                 removePlayer(getCurrentPlayer());
             }
 
+            advanceTurn();
+
             return;
         }
 
         if (!getCurrentPlayer().hasTokensInPlay() && successes > 0) {
             insertToken();
+
+            advanceTurn();
+
             return;
         }
 
@@ -120,14 +133,26 @@ public class Game {
         final Space nextSpace = board.getSpace(nextPos);
 
         if (board.getTokenAtPos(nextPos) != null) {
+            if (board.willTokenFinish(token, prevPos, nextPos)) {
+                payEveryonePays();
+
+                board.removeTokenAtPos(nextPos);
+
+                advanceTurn();
+
+                return;
+            }
+
             board.moveTokenToPos(prevPos, nextPos);
 
             if (nextSpace instanceof ExteriorSpace) {
             } else if (nextSpace instanceof TriangleSpace) {
                 payEveryoneDouble();
+
                 advanceTurn();
             } else if (nextSpace instanceof CentralSpace) {
                 board.removeTokenAtPos(nextPos);
+
                 advanceTurn();
             } else if (nextSpace instanceof SquareSpace) {
                 advanceTurn();
@@ -137,7 +162,9 @@ public class Game {
                 advanceTurn();
             } else if (nextSpace instanceof CentralSpace) {
                 board.removeTokenAtPos(nextPos);
+
                 board.moveTokenToPos(prevPos, nextPos);
+
                 advanceTurn();
             } else if (nextSpace instanceof SquareSpace) {
                 advanceTurn();
@@ -186,6 +213,7 @@ public class Game {
         final Player currentPlayer = getCurrentPlayer();
 
         currentPlayer.setBalance(currentPlayer.getBalance() - bet);
+
         player.setBalance(player.getBalance() + bet);
     }
 
@@ -203,6 +231,14 @@ public class Game {
                 for (int i = 0; i < 2; i++) {
                     pay(player);
                 }
+            }
+        }
+    }
+
+    private void payEveryonePays() {
+        for (Player player : players) {
+            if (player.equals(getCurrentPlayer())) {
+                pay(getCurrentPlayer());
             }
         }
     }
