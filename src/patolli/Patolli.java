@@ -6,6 +6,10 @@ import java.util.Random;
 /**
  *
  * @author Alec_
+ * 
+ * ESTABLER UN LIMITE DE APUESTA A 1/3 MAX
+ * Cuando te caen encima en el centro, se elimina, no puedes usar esa ficha de nuevo quitamos tu max de fichas a -1
+ * Para todos los momentos de "PAGA APUESTA" es con el monto fijo inicial, nunca se mueve hasta que acaba la partida
  */
 public class Patolli {
 
@@ -40,7 +44,9 @@ public class Patolli {
 //        agregarJugador(jugador1);
 //        agregarJugador(jugador2);
         
-        if(players.size() >= 2 && players.size() <= 4){
+        if(players.size() >= 1 && players.size() <= 4){
+            //Si solo hay 1 espera a que se unan más, según el max configurado de la sala
+            
             //Gráfico
              players.get(0).setBet(30);
              
@@ -63,7 +69,7 @@ public class Patolli {
         players.add(jugador);
     }
 
-    private static int lanzarDados(final int throws_) {
+    public static int lanzarDados(final int throws_) {
         Random random = new Random();
         int dadosTrue = 0;
 
@@ -76,6 +82,14 @@ public class Patolli {
         }
 
         return dadosTrue;
+    }
+
+    public static ArrayList<Player> getPlayers() {
+        return players;
+    }
+
+    public static void setPlayers(ArrayList<Player> players) {
+        Patolli.players = players;
     }
 
     public static int getBet() {

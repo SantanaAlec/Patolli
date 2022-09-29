@@ -10,10 +10,10 @@ import java.util.ArrayList;
 public class Player {
 
     private String name;
+    //private String id;
     private Color color; // color de jugador/fichas
     private ArrayList <Token> tokens; //min 2, max 6
     private int bag; // Fondos del jugador para bet
-    private int bet;
 
     public Player(String name, Color color, int bag) {
         this.name = name;
@@ -38,11 +38,11 @@ public class Player {
         this.color = color;
     }
 
-    public int getTokens() {
+    public ArrayList<Token> getTokens() {
         return tokens;
     }
 
-    public void setTokens(int tokens) {
+    public void setTokens(ArrayList<Token> tokens) {
         this.tokens = tokens;
     }
 
@@ -52,14 +52,6 @@ public class Player {
 
     public void setBag(int bag) {
         this.bag = bag;
-    }
-
-    public int getBet() {
-        return bet;
-    }
-
-    public void setBet(int bolsa) {
-        this.bet = bet;
     }
 
     @Override

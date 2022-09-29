@@ -4,12 +4,14 @@
  */
 package patolli.spaces;
 
+import patolli.Token;
+
 /**
  *
  * @author Alec_
  */
 public interface Space {
-    public int fixBet();
+
+    public void fixBet();
     public void deleteToken();
-    public void addToken();
-    }
+}
