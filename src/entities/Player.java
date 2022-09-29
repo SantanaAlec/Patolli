@@ -59,6 +59,10 @@ public class Player {
         this.balance = balance;
     }
 
+    public boolean isBroke() {
+        return balance <= 0;
+    }
+
     public Token createAndAssignToken(final int initialPos) {
         if (getTokensCount() < 6) {
             final Token token = new Token(this, initialPos);

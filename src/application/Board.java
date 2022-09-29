@@ -96,16 +96,27 @@ public class Board {
 
     public void insertTokenAtPos(final Token token, final int pos) {
         token.setCurrentPos(pos);
-        getSpace(pos).setToken(token);
+        getSpace(pos).insertToken(token);
     }
 
-    public void removeTokenAtPos(final int pos) {
-        getTokenAtPos(pos).setCurrentPos(-1);
-        getSpace(pos).setToken(null);
+    public void removeTokenAtPos(final Token token, final int pos) {
+        getSpace(pos).removeToken(token);
     }
 
-    public Token getTokenAtPos(final int pos) {
-        return getSpace(pos).getToken();
+    public void removeTokensAtPos(final int pos) {
+        getSpace(pos).clearTokens();
+    }
+
+    public void markTokenAsFinished(final Token token) {
+        token.setCurrentPos(-2);
+    }
+
+    public ArrayList<Token> getTokensAtPos(final int pos) {
+        return getSpace(pos).getTokens();
+    }
+
+    public Token getTokenAtPos(final int pos, final int index) {
+        return getSpace(pos).getToken(index);
     }
 
     public int getTokenPos(final Token token) {
@@ -114,19 +125,19 @@ public class Board {
 
     public void removeTokensFromPlayer(final Player player) {
         for (Token token : player.getTokens()) {
-            removeTokenAtPos(token.getCurrentPos());
+            removeTokensAtPos(token.getCurrentPos());
         }
     }
 
-    public void moveTokenToPos(final int prevPos, final int nextPos) {
+    public void moveTokenToPos(final Token token, final int nextPos) {
         int newPos = nextPos;
 
         if (nextPos > getBoardSize()) {
             newPos = nextPos - getBoardSize();
         }
 
-        insertTokenAtPos(getTokenAtPos(prevPos), newPos);
-        removeTokenAtPos(prevPos);
+        removeTokenAtPos(token, token.getCurrentPos());
+        insertTokenAtPos(token, newPos);
     }
 
     public boolean willTokenFinish(final Token token, final int prevPos, final int nextPos) {

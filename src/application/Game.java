@@ -76,100 +76,126 @@ public class Game {
     }
 
     public void playToken(final Token token) {
-        if (getCurrentPlayer().getBalance() <= 0) {
-            removePlayer(getCurrentPlayer());
-
-            advanceTurn();
-
-            return;
-        }
-
         final int successes = throwCoins(5);
 
         if (successes == 0) {
             // p a y
             payEveryone();
 
-            if (getCurrentPlayer().getBalance() <= 0) {
+            if (getCurrentPlayer().isBroke()) {
                 removePlayer(getCurrentPlayer());
+            } else {
+                advanceTurn();
             }
-
-            advanceTurn();
 
             return;
         }
 
         if (!getCurrentPlayer().hasTokensInPlay() && successes > 0) {
             insertToken();
+            advanceTurn();
+            return;
+        }
+
+        if (!playerHasFinished()) {
+            removePlayerAndAdvance();
+            return;
+        }
+
+        final int prevPos = board.getTokenPos(token);
+        final int nextPos = board.getTokenPos(token) + getSpacesToMove(successes);
+
+        final Space nextSpace = board.getSpace(nextPos);
+
+        if (spaceHasSameOwnerAsToken(nextPos)) {
+            moveToken(token, nextSpace, prevPos, nextPos);
+        } else {
+            landOnToken(token, nextSpace, nextPos);
+        }
+    }
+
+    private void removePlayerAndAdvance() {
+        removePlayer(getCurrentPlayer());
+
+        advanceTurn();
+    }
+
+    private boolean spaceHasSameOwnerAsToken(final int pos) {
+        return board.getSpace(pos).getOwner() == getCurrentPlayer();
+    }
+
+    private int getSpacesToMove(final int successes) {
+        switch (successes) {
+            case 1 -> {
+                return 1;
+            }
+            case 2 -> {
+                return 2;
+            }
+            case 3 -> {
+                return 3;
+            }
+            case 4 -> {
+                return 4;
+            }
+            case 5 -> {
+                return 5;
+            }
+        }
+
+        return 0;
+    }
+
+    private void moveToken(final Token token, final Space nextSpace, final int prevPos, final int nextPos) {
+        if (board.willTokenFinish(token, prevPos, nextPos)) {
+            payEveryonePays();
+
+            board.removeTokenAtPos(token, nextPos);
+            board.markTokenAsFinished(token);
 
             advanceTurn();
 
             return;
         }
 
-        int advance = 1;
+        board.moveTokenToPos(token, nextPos);
 
-        switch (successes) {
-            case 1 -> {
-                advance = 1;
-            }
-            case 2 -> {
-                advance = 2;
-            }
-            case 3 -> {
-                advance = 3;
-            }
-            case 4 -> {
-                advance = 4;
-            }
-            case 5 -> {
-                advance = 5;
+        if (nextSpace instanceof ExteriorSpace) {
+        } else if (nextSpace instanceof TriangleSpace) {
+            payEveryoneDouble();
+
+            advanceTurn();
+        } else if (nextSpace instanceof CentralSpace) {
+            advanceTurn();
+        } else if (nextSpace instanceof SquareSpace) {
+            advanceTurn();
+        }
+    }
+
+    private void landOnToken(final Token token, final Space nextSpace, final int nextPos) {
+        if (nextSpace instanceof TriangleSpace) {
+            advanceTurn();
+        } else if (nextSpace instanceof CentralSpace) {
+            board.removeTokenAtPos(token, nextPos);
+
+            board.moveTokenToPos(token, nextPos);
+
+            advanceTurn();
+        } else if (nextSpace instanceof SquareSpace) {
+            advanceTurn();
+        }
+    }
+
+    private boolean playerHasFinished() {
+        if (getCurrentPlayer().getTokensCount() == 6) {
+            for (Token token : getCurrentPlayer().getTokens()) {
+                if (token.getCurrentPos() >= 0) {
+                    return true;
+                }
             }
         }
 
-        final int prevPos = board.getTokenPos(token);
-        final int nextPos = board.getTokenPos(token) + advance;
-
-        final Space nextSpace = board.getSpace(nextPos);
-
-        if (board.getTokenAtPos(nextPos) != null) {
-            if (board.willTokenFinish(token, prevPos, nextPos)) {
-                payEveryonePays();
-
-                board.removeTokenAtPos(nextPos);
-
-                advanceTurn();
-
-                return;
-            }
-
-            board.moveTokenToPos(prevPos, nextPos);
-
-            if (nextSpace instanceof ExteriorSpace) {
-            } else if (nextSpace instanceof TriangleSpace) {
-                payEveryoneDouble();
-
-                advanceTurn();
-            } else if (nextSpace instanceof CentralSpace) {
-                board.removeTokenAtPos(nextPos);
-
-                advanceTurn();
-            } else if (nextSpace instanceof SquareSpace) {
-                advanceTurn();
-            }
-        } else {
-            if (nextSpace instanceof TriangleSpace) {
-                advanceTurn();
-            } else if (nextSpace instanceof CentralSpace) {
-                board.removeTokenAtPos(nextPos);
-
-                board.moveTokenToPos(prevPos, nextPos);
-
-                advanceTurn();
-            } else if (nextSpace instanceof SquareSpace) {
-                advanceTurn();
-            }
-        }
+        return false;
     }
 
     private int getPlayerCount() {
@@ -215,6 +241,10 @@ public class Game {
         currentPlayer.setBalance(currentPlayer.getBalance() - bet);
 
         player.setBalance(player.getBalance() + bet);
+
+        if (currentPlayer.isBroke()) {
+            removePlayerAndAdvance();
+        }
     }
 
     private void payEveryone() {

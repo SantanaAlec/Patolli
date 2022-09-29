@@ -4,18 +4,48 @@
  */
 package entities.spaces;
 
+import entities.Player;
 import entities.Token;
+import java.util.ArrayList;
 
 public abstract class Space {
 
-    private Token token;
+    private final ArrayList<Token> tokens = new ArrayList<>();
 
-    public Token getToken() {
-        return token;
+    public ArrayList<Token> getTokens() {
+        return tokens;
     }
 
-    public void setToken(Token token) {
-        this.token = token;
+    public Token getToken(final int index) {
+        return tokens.get(index - 1);
+    }
+
+    public void setToken(final int index, final Token token) {
+        tokens.set(index, token);
+    }
+
+    public void insertToken(final Token token) {
+        tokens.add(token);
+    }
+
+    public void removeToken(final Token token) {
+        tokens.remove(token);
+    }
+
+    public void clearTokens() {
+        tokens.clear();
+    }
+
+    public boolean hasTokens() {
+        return !tokens.isEmpty();
+    }
+
+    public Player getOwner() {
+        if (hasTokens()) {
+            return tokens.get(0).getOwner();
+        }
+
+        return null;
     }
 
 }
