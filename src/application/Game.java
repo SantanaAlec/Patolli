@@ -81,13 +81,6 @@ public class Game {
         if (successes == 0) {
             // p a y
             payEveryone();
-
-            if (getCurrentPlayer().isBroke()) {
-                removePlayer(getCurrentPlayer());
-            } else {
-                advanceTurn();
-            }
-
             return;
         }
 
@@ -116,7 +109,6 @@ public class Game {
 
     private void removePlayerAndAdvance() {
         removePlayer(getCurrentPlayer());
-
         advanceTurn();
     }
 
@@ -163,8 +155,6 @@ public class Game {
         if (nextSpace instanceof ExteriorSpace) {
         } else if (nextSpace instanceof TriangleSpace) {
             payEveryoneDouble();
-
-            advanceTurn();
         } else if (nextSpace instanceof CentralSpace) {
             advanceTurn();
         } else if (nextSpace instanceof SquareSpace) {
@@ -244,6 +234,8 @@ public class Game {
 
         if (currentPlayer.isBroke()) {
             removePlayerAndAdvance();
+        } else {
+            advanceTurn();
         }
     }
 
