@@ -18,6 +18,8 @@ public class Player {
 
     private final ArrayList<Token> tokens = new ArrayList<>();
 
+    private int currentToken = 0;
+
     private int balance;
 
     public Player(String name, Color color, int balance) {
@@ -57,6 +59,10 @@ public class Player {
 
     public void setBalance(int balance) {
         this.balance = balance;
+    }
+
+    public int getCurrentToken() {
+        return currentToken;
     }
 
     public boolean isBroke() {
@@ -105,6 +111,16 @@ public class Player {
 
     public void clearTokens() {
         tokens.clear();
+    }
+
+    public void selectNextToken() {
+        if (hasTokensInPlay()) {
+            currentToken++;
+        }
+
+        if (currentToken > getTokensCount()) {
+            currentToken = 0;
+        }
     }
 
 }

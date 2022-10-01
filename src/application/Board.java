@@ -140,8 +140,9 @@ public class Board {
         insertTokenAtPos(token, newPos);
     }
 
-    public boolean willTokenFinish(final Token token, final int prevPos, final int nextPos) {
+    public boolean willTokenFinish(final Token token, final int nextPos) {
         final int initialPos = token.getInitialPos();
+        final int prevPos = token.getCurrentPos();
 
         if (nextPos > getBoardSize()) {
             if (nextPos - getBoardSize() >= initialPos) {
