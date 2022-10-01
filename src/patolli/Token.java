@@ -4,7 +4,7 @@
  */
 package patolli;
 
-import patolli.spaces.Space;
+import spaces.Space;
 
 /**
  *
@@ -13,9 +13,10 @@ import patolli.spaces.Space;
 public class Token {
 
     private Player owner;
-    private int position;
-    private boolean destroyed = false;
-    private boolean goal = false;
+    //De donde sale y hasta donde tiene que llegar
+    private int initialPosition;
+    //Casilla donde esta
+    private int actualPosition;
 
     public Token() {
     }
@@ -24,6 +25,12 @@ public class Token {
     public Token(Player owner) {
         this.owner = owner;
     }
+    
+    //Establecer casilla de entrada de la ficha
+    public Token(int position) {
+        this.initialPosition = position;
+    }
+
 
     public Player getOwner() {
         return owner;
@@ -33,27 +40,24 @@ public class Token {
         this.owner = owner;
     }
 
-    public boolean isDestroyed() {
-        return destroyed;
+    public int getInitialPosition() {
+        return initialPosition;
     }
 
-    public void setDestroyed(boolean destroyed) {
-        this.destroyed = destroyed;
+    public void setInitialPosition(int initialPosition) {
+        this.initialPosition = initialPosition;
     }
 
-    public boolean isGoal() {
-        return goal;
+    public int getActualPosition() {
+        return actualPosition;
     }
 
-    public void setGoal(boolean goal) {
-        this.goal = goal;
+    public void setActualPosition(int actualPosition) {
+        this.actualPosition = actualPosition;
     }
 
-    public int getPosition() {
-        return position;
-    }
-
-    public void setPosition(int position) {
-        this.position = position;
+    //Posicionar token en el tablero (cuantas casillas avanza)
+    public void advancePos(int count) {
+        actualPosition += count;
     }
 }

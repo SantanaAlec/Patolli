@@ -12,7 +12,7 @@ public class Player {
     private String name;
     //private String id;
     private Color color; // color de jugador/fichas
-    private ArrayList <Token> tokens; //min 2, max 6
+    private ArrayList <Token> tokens; //Lista de tokens en partida, max 6
     private int bag; // Fondos del jugador para bet
 
     public Player(String name, Color color, int bag) {
@@ -54,8 +54,24 @@ public class Player {
         this.bag = bag;
     }
 
-    @Override
-    public String toString() {
-        return "Player{" + "nombre=" + name + ", color=" + color + ", fichas=" + tokens + ", bolsa=" + bag + '}';
+    //Métodos de utilidad
+    //Creo un token que se va a meter al tablero y le asigno jugador
+    public void addToken(Token token){
+        tokens.add(token);
+    }
+    
+    //Si pierde un token en las casillas centrales
+    public void removeToken(Token token){
+        tokens.remove(token);
+    }
+    
+    //Cuantas fichas tengo en el tablero
+    public int tokensInGame(){
+        return tokens.size();
+    }
+    
+    //Verificar si perdio el juego
+    public boolean bagIsEmpty(){
+        return bag <= 0;
     }
 }
