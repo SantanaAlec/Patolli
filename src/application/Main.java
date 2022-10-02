@@ -26,29 +26,17 @@ public class Main {
         players.add(new Player("004", Color.blue, 100));
 
         game.addPlayers(players);
+        //game.shufflePlayers();
 
         if (!game.run()) {
             System.exit(1);
         }
-        
+
         // Player 1 plays
-        game.playToken(null, 3);
-        
-        // Player 2 plays
-        game.playToken(null, 0);
-        
-        // Player 3 plays
-        game.playToken(null , 2);
-        
-        // Player 4 plays
-        game.playToken(null, 2);
-        
-        // Player 1 plays
-        game.playToken(null, 2);
-        
-        for (Player player : players) {
-            System.out.println(player.getBalance() + " BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        while (!game.hasFinished()) {
+            game.play(null);
         }
+
     }
 
 }
