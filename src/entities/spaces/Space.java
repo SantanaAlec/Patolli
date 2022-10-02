@@ -2,12 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package spaces;
+package entities.spaces;
 
 
 import java.util.ArrayList;
-import patolli.Player;
-import patolli.Token;
 
 public abstract class Space {
 

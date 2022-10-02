@@ -1,11 +1,13 @@
 package patolli;
 
+import entities.spaces.Token;
 import java.util.ArrayList;
-import spaces.Space;
-import spaces.CentralSpace;
-import spaces.ExteriorSpace;
-import spaces.SquareSpace;
-import spaces.TriangleSpace;
+import entities.spaces.Space;
+import entities.spaces.CentralSpace;
+import entities.spaces.ExteriorSpace;
+import entities.spaces.Player;
+import entities.spaces.SquareSpace;
+import entities.spaces.TriangleSpace;
 
 /**
  *
@@ -13,99 +15,84 @@ import spaces.TriangleSpace;
  */
 public class Board {
 
-    private final ArrayList<Player> players;
+    private static Board instance;
+
+    /**
+     * Singleton pattern to keep a single instance of this class program running
+     *
+     * @return The instance of the program is returned, if there's none a new
+     * one is created
+     */
+    public static Board getInstance() {
+        if (instance == null) {
+            instance = new Board();
+        }
+
+        return instance;
+    }
+
     private final ArrayList<Space> spaces = new ArrayList<>();
 
-    public Board(final int squares, final int triangles, final ArrayList<Player> players) {
-        this.players = players;
-        createBoard(squares, triangles);
+    private final int SQUARES_AMOUNT = 3, TRIANGLES_AMOUNT = 2;
+
+    private Board() {
     }
 
-    //Método que crea el tablero de Patolli
-    private void createBoard(final int squares, final int triangles) {
-        //total: 52 - triagnle: 16 - exterior: 8 - central: 4
-        //Dividir en varios metodos
+    public void init() {
+        createBoard();
+    }
+
+    private void createBoard() {
+        resetBoard();
+
         for (int index = 0; index < 4; index++) {
-            for (int side = 0; side < 2; side++) {
-                for (int square = 0; square < squares; square++) {
-                    spaces.add(new SquareSpace());
-                }
+            addBlade(SQUARES_AMOUNT, TRIANGLES_AMOUNT);
 
-                if (side == 0) {
-                    for (int triangle = 0; triangle < triangles; triangle++) {
-                        spaces.add(new TriangleSpace());
-                    }
-                }
-
-                if (side < 1) {
-                    for (int exterior = 0; exterior < 2; exterior++) {
-                        spaces.add(new ExteriorSpace());
-                    }
-
-                    for (int triangle = 0; triangle < triangles; triangle++) {
-                        spaces.add(new TriangleSpace());
-                    }
-                }
-            }
-
-            spaces.add(new CentralSpace());
+            addCenterSpace();
         }
     }
 
-//    public void regresarToken(Token token, Space space) {
-//        if (space instanceof CentralSpace) {
-//
-//        } else {
-//            //Si a la ficha que es actualmente dueña de la casilla le caen encima, devuelve al que le cayo encima
-//            if (token.getOwner() !=) {
-//
-//            }
-//        }
-//    }
-    
-//    //Para cuando ya hay fichas adentro
-//    public void moverToken(Token token) {
-//        //Establecer quien esta lanzando los dados
-//        switch (Patolli.lanzarDados(5)) {
-//            case 0 ->
-//                playersDemand(token);
-//            case 1 ->
-//                token.setPosition(token.getPosition() + 1); //Tratar de arreglar la posición para que funcione como Space
-//            case 2 ->
-//                token.setPosition(token.getPosition() + 2);
-//            case 3 ->
-//                token.setPosition(token.getPosition() + 3);
-//            case 4 ->
-//                token.setPosition(token.getPosition() + 4);
-//            case 5 ->
-//                token.setPosition(token.getPosition() + 10);
-//            default ->
-//                throw new AssertionError();
-//        }
-//    }
-//
-//    public void insertarToken(Player player) {
-//        //Si tú como jugador no tienes fichas dentro, en tu primer tirada usa esto
-//        //Establecer quien esta lanzando los dados
-//        if (Patolli.lanzarDados(5) >= 1) {
-//            //Ingresar ficha
-//            Token token = new Token(player);
-//            tokens.add(token);
-//            //Establecer en la posición que debe iniciar
-//        }
-//    }
+    private void addBlade(final int squares, final int triangles) {
+        final int RIGHT = 0, LEFT = 1;
+        for (int side = RIGHT; side < 2; side++) {
+            addSquareSpaces(squares);
 
-    public void playersDemand(Token token) {
-        for (Player player : Patolli.getPlayers()) {
-            if (player.equals(token.getOwner())) {
-                player.setBag(player.getBag() - ((Patolli.getBet() * 2) * (Patolli.getPlayers().size() - 1)));
-                if (player.getBag() <= 0) {
-                    //Establecer que perdio el juego y ponerlo en gris pero que continue para los demás
-                }
-            } else {
-                player.setBag(player.getBag() + ((Patolli.getBet() * 2)));
+            if (side == RIGHT) {
+                addTriangleSpaces(triangles);
+                addExteriorSpace();
+            } else if (side == LEFT) {
+                addExteriorSpace();
+                addTriangleSpaces(triangles);
             }
         }
+    }
+
+    private void addSquareSpaces(final int amount) {
+        for (int index = 0; index < amount; index++) {
+            spaces.add(new SquareSpace());
+        }
+    }
+
+    private void addTriangleSpaces(final int amount) {
+        for (int index = 0; index < amount; index++) {
+            spaces.add(new TriangleSpace());
+        }
+    }
+
+    private void addExteriorSpace() {
+        spaces.add(new ExteriorSpace());
+    }
+
+    private void addCenterSpace() {
+        spaces.add(new CentralSpace());
+    }
+
+    public int getBoardSize() {
+        return spaces.size();
+    }
+
+    public void resetBoard() {
+        this.spaces.clear();
     }
 
     //NUEVOS MÉTODOS
@@ -126,12 +113,13 @@ public class Board {
     //MÉTODO PARA MOVER LOS TOKENS Y REGISTRARLOS DENTRO DEL TABLERO
     public void move(Token token, int position) {
         //Elimina el token de la posición previa y ponlo en la nueva posición
-        
-////////////        //Apliicar para que no se sobrepase la posición, que lo mueva del final del arreglo de vuelta al principio 
-////////////        /**
-////////////         * 
-////////////         */
-        
+
+        //Apliicar para que no se sobrepase la posición, que lo mueva del final del arreglo de vuelta al principio 
+        //Si la posición llega a revasar el tamaño del tablero, llevalo al inicio del mismo
+        if (position > boardSize()) {
+            position = position - boardSize();
+        }
+
         //Obtenemos la posición en la que estaba
         //Removemos su antigua posición
         //spaces.get(token.getActualPosition()).removeToken(token);
@@ -142,27 +130,70 @@ public class Board {
     }
 
     //Método para sacer la ficha y por ende llego a la meta
-    public void goalToken(Token token, int newPosition) {
+    public void goalToken(Token token, int nextPosistion) {
         //Checar que venga de atras, que de donde viene es de atras de la inicial y que la de enfrente sea la inicial
         int last = token.getActualPosition();
         int goal = token.getInitialPosition();
-        
+
         //Si la sig. posición sobrepasa el arreglo regresar al inicio del mismo arreglo
-        if (newPosition > boardSize()) {
-            if ((newPosition - boardSize()) >= goal) {
+        if (nextPosistion > boardSize()) {
+            if ((nextPosistion - boardSize()) >= goal) {
                 token.setActualPosition(-2);
-                spaces.get(newPosition).removeToken(token);
+                spaces.get(nextPosistion).removeToken(token);
             }
         }
         //Checar si viene desde atras, osea le dio la vuelta al tablero desde la posición inicial
-        if (last < goal && newPosition >= goal) {
-            spaces.get(newPosition).removeToken(token);
+        if (last < goal && nextPosistion >= goal) {
+            spaces.get(nextPosistion).removeToken(token);
             token.setActualPosition(-2);
         }
     }
-    
+
+    public boolean isTokenAboutToWin(Token token, int nextPosistion) {
+        //Checar que venga de atras, que de donde viene es de atras de la inicial y que la de enfrente sea la inicial
+        int last = token.getActualPosition();
+        int goal = token.getInitialPosition();
+
+        //Si la sig. posición sobrepasa el arreglo regresar al inicio del mismo arreglo
+        if (nextPosistion > boardSize()) {
+            if ((nextPosistion - boardSize()) >= goal) {
+                return true;
+            }else{
+                return false;
+            }
+        }
+        //Checar si viene desde atras, osea le dio la vuelta al tablero desde la posición inicial
+        if (last < goal && nextPosistion >= goal) {
+            return true;
+        }
+        return false;
+    }
+
     //Método para saber el tamaño del tablero
     public int boardSize() {
         return spaces.size();
+    }
+
+    /**
+     * Método para limpiar tokens
+     *
+     * @param position
+     */
+    public void clearTokens(int position) {
+        spaces.get(position).clearTokens();
+    }
+
+    public void removeTokensAtPos(final int pos) {
+        getSpace(pos).clearTokens();
+    }
+
+    public Space getSpace(final int index) {
+        return spaces.get(index);
+    }
+
+    public void removeTokensFromPlayer(final Player player) {
+        for (Token token : player.getTokens()) {
+            removeTokensAtPos(token.getActualPosition());
+        }
     }
 }

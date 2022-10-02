@@ -2,9 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package patolli;
+package entities.spaces;
 
-import spaces.Space;
+import entities.spaces.Space;
 
 /**
  *
@@ -21,6 +21,11 @@ public class Token {
     public Token() {
     }
 
+   public Token(Player owner, int position) {
+        this.owner = owner;
+        this.initialPosition = position;
+    }
+   
     //Establecer al dueño de la ficha
     public Token(Player owner) {
         this.owner = owner;

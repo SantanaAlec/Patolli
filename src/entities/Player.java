@@ -1,4 +1,4 @@
-package patolli;
+package entities.spaces;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -10,10 +10,10 @@ import java.util.ArrayList;
 public class Player {
 
     private String name;
-    //private String id;
     private Color color; // color de jugador/fichas
     private ArrayList <Token> tokens; //Lista de tokens en partida, max 6
     private int bag; // Fondos del jugador para bet
+    private int currentToken;
 
     public Player(String name, Color color, int bag) {
         this.name = name;
@@ -54,6 +54,14 @@ public class Player {
         this.bag = bag;
     }
 
+    public int getCurrentToken() {
+        return currentToken;
+    }
+
+    public void setCurrentToken(int currentToken) {
+        this.currentToken = currentToken;
+    }
+    
     //Métodos de utilidad
     //Creo un token que se va a meter al tablero y le asigno jugador
     public void addToken(Token token){
@@ -71,7 +79,19 @@ public class Player {
     }
     
     //Verificar si perdio el juego
-    public boolean bagIsEmpty(){
+    public boolean isBroke(){
         return bag <= 0;
+    }
+    
+    //Método para aumentar el orden de la ficha
+    public void nextToken(){
+        currentToken++;
+        if (currentToken > tokens.size()) {
+            currentToken = 0;
+        }
+    }
+    
+    public Token getNextToken(){
+        return tokens.get(currentToken);
     }
 }
