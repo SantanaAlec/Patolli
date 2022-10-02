@@ -136,7 +136,7 @@ public class Game {
 
     public void play() {
         final int successes = countCoins(5);
-
+        //playToken(null, successes);
         playToken(selectAToken(), successes);
     }
 
@@ -212,9 +212,9 @@ public class Game {
 
         if (getCurrentPlayer().tokensInPlay() == 0) {
             insertToken();
-
+            
             getCurrentPlayer().selectNextToken();
-
+            
             advanceTurn();
             return;
         }

@@ -19,7 +19,7 @@ public class Main {
         //game();
         game.setSquares(2);
         game.setBet(5);
-        game.setMaxTokens(2);
+        game.setMaxTokens(3);
 
         final ArrayList<Player> players = new ArrayList<>();
         players.add(new Player("Al", Color.yellow, 100, game.getMaxTokens()));
