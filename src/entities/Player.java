@@ -65,6 +65,13 @@ public class Player {
         return currentToken;
     }
 
+    public String getIdString() {
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append("(").append(id).append(")");
+        return sb.toString();
+    }
+
     public boolean isBroke() {
         return balance <= 0;
     }
@@ -83,6 +90,18 @@ public class Player {
 
     public Token getToken(final int index) {
         return tokens.get(index - 1);
+    }
+
+    public int getTokenIndex(final Token token) {
+        if (!tokens.isEmpty()) {
+            for (int i = 1; i <= getTokensCount(); i++) {
+                if (getToken(i).equals(token)) {
+                    return i;
+                }
+            }
+        }
+
+        return -1;
     }
 
     public Token getFirstToken() {
@@ -109,6 +128,10 @@ public class Player {
         return getTokensCount() > 0;
     }
 
+    public boolean hasInsertedAllTokens() {
+        return getTokensCount() >= 6;
+    }
+
     public void clearTokens() {
         tokens.clear();
     }
@@ -119,7 +142,7 @@ public class Player {
         }
 
         if (currentToken > getTokensCount()) {
-            currentToken = 0;
+            currentToken = 1;
         }
     }
 

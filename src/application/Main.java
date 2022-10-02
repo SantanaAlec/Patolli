@@ -4,6 +4,10 @@
  */
 package application;
 
+import entities.Player;
+import java.awt.Color;
+import java.util.ArrayList;
+
 public class Main {
 
     private static final Game game = Game.getInstance();
@@ -13,11 +17,36 @@ public class Main {
      */
     public static void main(String[] args) {
         //game();
-        game.run();
-    }
+        game.setBet(5);
 
-    public static Game getGame() {
-        return game;
+        final ArrayList<Player> players = new ArrayList<>();
+        players.add(new Player("001", Color.yellow, 100));
+        players.add(new Player("002", Color.red, 100));
+        players.add(new Player("003", Color.green, 100));
+        players.add(new Player("004", Color.blue, 100));
+
+        game.addPlayers(players);
+
+        if (!game.run()) {
+            System.exit(1);
+        }
+        
+        // Player 1 plays
+        game.playToken(null);
+        
+        // Player 2 plays
+        game.playToken(null);
+        
+        // Player 3 plays
+        game.playToken(null);
+        
+        // Player 4 plays
+        game.playToken(null);
+        
+        // Player 1 plays
+        game.playToken(null);
+        
+        
     }
 
 }

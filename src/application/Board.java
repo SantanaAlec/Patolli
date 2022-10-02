@@ -12,6 +12,7 @@ import entities.spaces.Space;
 import entities.spaces.SquareSpace;
 import entities.spaces.TriangleSpace;
 import java.util.ArrayList;
+import utilities.Console;
 
 public class Board {
 
@@ -32,23 +33,23 @@ public class Board {
 
     private final ArrayList<Space> spaces = new ArrayList<>();
 
-    private final int SQUARES_AMOUNT = 5, TRIANGLES_AMOUNT = 1;
-
     private Board() {
     }
 
-    public void init() {
-        createBoard();
+    public void init(final int squares, final int triangles) {
+        createBoard(squares, triangles);
     }
 
-    private void createBoard() {
+    private void createBoard(final int squares, final int triangles) {
         resetBoard();
 
         for (int index = 0; index < 4; index++) {
-            addBlade(SQUARES_AMOUNT, TRIANGLES_AMOUNT);
+            addBlade(squares, triangles);
 
             addCenterSpace();
         }
+        
+        Console.WriteLine("Created board of size " + getBoardSize());
     }
 
     private void addBlade(final int squares, final int triangles) {
@@ -94,7 +95,11 @@ public class Board {
         this.spaces.clear();
     }
 
-    public void insertTokenAtPos(final Token token, final int pos) {
+    public void insertNewTokenAtPos(final Token token, final int pos) {
+        insertTokenAtPos(token, pos);
+    }
+
+    private void insertTokenAtPos(final Token token, final int pos) {
         token.setCurrentPos(pos);
         getSpace(pos).insertToken(token);
     }
@@ -103,7 +108,7 @@ public class Board {
         getSpace(pos).removeToken(token);
     }
 
-    public void removeTokensAtPos(final int pos) {
+    private void removeTokensAtPos(final int pos) {
         getSpace(pos).clearTokens();
     }
 
@@ -164,7 +169,13 @@ public class Board {
     }
 
     public Space getSpace(final int index) {
-        return spaces.get(index - 1);
+        int position = index;
+
+        if (index > getBoardSize()) {
+            position -= getBoardSize();
+        }
+
+        return spaces.get(position - 1);
     }
 
     public ArrayList<Space> getSpaces() {

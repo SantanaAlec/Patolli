@@ -14,6 +14,7 @@ import entities.spaces.TriangleSpace;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
+import utilities.Console;
 
 public class Game {
 
@@ -26,6 +27,7 @@ public class Game {
      */
     public static Game getInstance() {
         if (instance == null) {
+            Console.WriteLine("Game instance not found. Creating new instance");
             instance = new Game();
         }
 
@@ -41,38 +43,86 @@ public class Game {
 
     private int bet;
 
-    private int turn = 0;
+    private int turn = 1;
 
-    public void run() {
-        init();
+    public boolean run() {
+        if (!init()) {
+            Console.WriteLine("Failed to initialize game");
+            return false;
+        }
+
+        return true;
     }
 
-    private void init() {
-        board.init();
+    private boolean init() {
+        if (getPlayerCount() < 2) {
+            Console.WriteLine("Not enough players have joined the game (" + getPlayerCount() + "/4)");
+            return false;
+        }
+
+        if (bet <= 0) {
+            Console.WriteLine("A minimum bet is required to play");
+            return false;
+        }
+
+        shufflePlayers();
+        board.init(4, 2);
+
+        return true;
     }
 
     public void addPlayer(final Player player) {
+        Console.WriteLine("Adding new player to game " + player.getIdString());
         players.add(player);
     }
 
+    public void addPlayers(final ArrayList<Player> players) {
+        Console.WriteLine("Adding new players to game " + players.size() + " players");
+        this.players.addAll(players);
+    }
+
     private void removePlayer(final Player player) {
+        Console.WriteLine("Removing player from game " + player.getIdString());
         board.removeTokensFromPlayer(player);
         players.remove(player);
     }
 
-    public void shufflePlayers() {
+    private void shufflePlayers() {
+        Console.WriteLine("Shuffling order of players");
+
         Collections.shuffle(players);
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("New player order: ");
+
+        for (int i = 0; i < getPlayerCount(); i++) {
+            sb.append(getPlayer(i).getName());
+            sb.append(", ");
+        }
+
+        sb.delete(sb.length() - 2, sb.length());
+
+        Console.WriteLine(sb.toString());
     }
 
     private void insertToken() {
         final Player player = getCurrentPlayer();
+
         final Token token = player.createAndAssignToken(getCurrentPlayerStartPos());
 
-        board.insertTokenAtPos(token, token.getInitialPos());
+        board.insertNewTokenAtPos(token, token.getInitialPos());
+
+        Console.WriteLine("Inserted new token in board for player " + player.getName() + " at position " + token.getInitialPos());
+        advanceTurn();
     }
 
     public Token selectToken(final int index) {
-        return getCurrentPlayer().getToken(index);
+        final Player player = getCurrentPlayer();
+        final Token token = player.getToken(index);
+
+        Console.WriteLine("Selecting token " + index + " of player " + player.getName() + " in position " + token.getCurrentPos());
+
+        return token;
     }
 
     public void playToken(final Token token) {
@@ -86,27 +136,33 @@ public class Game {
         }
 
         if (selectedToken == null) {
-            if (!getCurrentPlayer().hasTokensInPlay() && successes > 0) {
-                insertToken();
-                advanceTurn();
-                return;
-            }
-
-            if (!playerHasFinished()) {
+            if (playerHasFinished()) {
                 removePlayerAndAdvance();
                 return;
             }
 
-            selectedToken = selectToken(getCurrentPlayer().getCurrentToken());
+            if (!getCurrentPlayer().hasTokensInPlay() && successes > 0) {
+                insertToken();
+                return;
+            }
+
+            if (!getCurrentPlayer().hasInsertedAllTokens() && successes == 1) {
+                insertToken();
+                return;
+            }
+
+            selectedToken = selectToken(getCurrentPlayer().getCurrentToken() + 1);
         } else {
             payEveryone();
         }
-        
+
         final int nextPos = board.getTokenPos(selectedToken) + getSpacesToMove(successes);
 
         final Space nextSpace = board.getSpace(nextPos);
 
-        if (spaceHasSameOwnerAsToken(nextPos)) {
+        if (board.willTokenFinish(selectedToken, nextPos)) {
+            removeTokenThatFinished(selectedToken);
+        } else if (tokenCanLandOnSpace(nextPos)) {
             moveToken(selectedToken, nextSpace, nextPos);
         } else {
             landOnToken(selectedToken, nextSpace, nextPos);
@@ -120,8 +176,134 @@ public class Game {
         advanceTurn();
     }
 
-    private boolean spaceHasSameOwnerAsToken(final int pos) {
-        return board.getSpace(pos).getOwner() == getCurrentPlayer();
+    private boolean tokenCanLandOnSpace(final int pos) {
+        return board.getSpace(pos).getOwner() == null || board.getSpace(pos).getOwner() == getCurrentPlayer();
+    }
+
+    private void moveToken(final Token token, final Space nextSpace, final int nextPos) {
+        Console.WriteLine("Token " + getCurrentPlayer().getTokenIndex(token) + " of player " + getCurrentPlayer().getName() + " moves to space at position " + nextPos);
+        board.moveTokenToPos(token, nextPos);
+
+        if (nextSpace instanceof ExteriorSpace) {
+        } else if (nextSpace instanceof TriangleSpace) {
+            payEveryoneDouble();
+        } else if (nextSpace instanceof CentralSpace) {
+            advanceTurn();
+        } else if (nextSpace instanceof SquareSpace) {
+            advanceTurn();
+        }
+    }
+
+    private void landOnToken(final Token token, final Space nextSpace, final int nextPos) {
+        Console.WriteLine("Token " + getCurrentPlayer().getTokenIndex(token) + " of player " + getCurrentPlayer().getName() + " moves to space occupied by " + nextSpace.getOwner().getName());
+
+        if (nextSpace instanceof TriangleSpace) {
+            advanceTurn();
+        } else if (nextSpace instanceof CentralSpace) {
+            board.removeTokenAtPos(token, nextPos);
+
+            board.moveTokenToPos(token, nextPos);
+
+            advanceTurn();
+        } else if (nextSpace instanceof SquareSpace) {
+            advanceTurn();
+        }
+    }
+
+    private void removeTokenThatFinished(final Token token) {
+        Console.WriteLine("Token " + getCurrentPlayer().getTokenIndex(token) + " of player " + getCurrentPlayer().getName() + " has finished");
+
+        payEveryonePays();
+
+        board.removeTokenAtPos(token, token.getCurrentPos());
+        board.markTokenAsFinished(token);
+
+        advanceTurn();
+    }
+
+    private boolean playerHasFinished() {
+        if (getCurrentPlayer().getTokensCount() == 6) {
+            for (Token token : getCurrentPlayer().getTokens()) {
+                if (token.getCurrentPos() >= 0) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void advanceTurn() {
+        turn++;
+
+        if (turn > getPlayerCount()) {
+            turn = 1;
+        }
+
+        Console.WriteLine("It is now player " + getCurrentPlayer().getName() + "'s turn");
+    }
+
+    private int countCoins(final int amount) {
+        Random random = new Random();
+        int successes = 0;
+
+        Console.WriteLine("Throwing " + amount + " coin" + (amount == 1 ? "" : "s") + " for player " + getCurrentPlayer().getName());
+
+        for (int i = 0; i < amount; i++) {
+            if (random.nextBoolean()) {
+                successes++;
+            }
+        }
+
+        Console.WriteLine(successes + " coin" + (successes == 1 ? "" : "s") + " landed on true");
+
+        return successes;
+    }
+
+    private void pay(final Player player) {
+        final Player currentPlayer = getCurrentPlayer();
+
+        currentPlayer.setBalance(currentPlayer.getBalance() - bet);
+
+        player.setBalance(player.getBalance() + bet);
+    }
+
+    private void payEveryone() {
+        for (Player player : players) {
+            if (!player.equals(getCurrentPlayer())) {
+                pay(player);
+            }
+        }
+
+        if (getCurrentPlayer().isBroke()) {
+            removePlayerAndAdvance();
+        } else {
+            advanceTurn();
+        }
+    }
+
+    private void payEveryoneDouble() {
+        for (int i = 0; i < 2; i++) {
+            payEveryone();
+        }
+
+        if (getCurrentPlayer().isBroke()) {
+            removePlayerAndAdvance();
+        } else {
+            advanceTurn();
+        }
+    }
+
+    private void payEveryonePays() {
+        for (Player player : players) {
+            if (player.equals(getCurrentPlayer())) {
+                pay(getCurrentPlayer());
+
+                if (player.isBroke()) {
+                    removePlayer(player);
+                }
+            }
+        }
     }
 
     private int getSpacesToMove(final int successes) {
@@ -146,73 +328,16 @@ public class Game {
         return 0;
     }
 
-    private void moveToken(final Token token, final Space nextSpace, final int nextPos) {
-        if (board.willTokenFinish(token, nextPos)) {
-            payEveryonePays();
-
-            board.removeTokenAtPos(token, nextPos);
-            board.markTokenAsFinished(token);
-
-            advanceTurn();
-
-            return;
-        }
-
-        board.moveTokenToPos(token, nextPos);
-
-        if (nextSpace instanceof ExteriorSpace) {
-        } else if (nextSpace instanceof TriangleSpace) {
-            payEveryoneDouble();
-        } else if (nextSpace instanceof CentralSpace) {
-            advanceTurn();
-        } else if (nextSpace instanceof SquareSpace) {
-            advanceTurn();
-        }
-    }
-
-    private void landOnToken(final Token token, final Space nextSpace, final int nextPos) {
-        if (board.willTokenFinish(token, nextPos)) {
-            payEveryonePays();
-
-            board.removeTokenAtPos(token, nextPos);
-            board.markTokenAsFinished(token);
-
-            advanceTurn();
-
-            return;
-        }
-        
-        if (nextSpace instanceof TriangleSpace) {
-            advanceTurn();
-        } else if (nextSpace instanceof CentralSpace) {
-            board.removeTokenAtPos(token, nextPos);
-
-            board.moveTokenToPos(token, nextPos);
-
-            advanceTurn();
-        } else if (nextSpace instanceof SquareSpace) {
-            advanceTurn();
-        }
-    }
-
-    private boolean playerHasFinished() {
-        if (getCurrentPlayer().getTokensCount() == 6) {
-            for (Token token : getCurrentPlayer().getTokens()) {
-                if (token.getCurrentPos() >= 0) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     private int getPlayerCount() {
         return players.size();
     }
 
+    private Player getPlayer(final int index) {
+        return players.get(index);
+    }
+
     private Player getCurrentPlayer() {
-        return players.get(turn);
+        return getPlayer(turn - 1);
     }
 
     private int getCurrentPlayerStartPos() {
@@ -220,68 +345,23 @@ public class Game {
         final int sectionSquares = boardSize / 4;
         final int blades = 4;
 
-        return boardSize - sectionSquares * (1 + (blades - (turn + 1)));
+        return (boardSize - sectionSquares * (1 + (blades - (turn)))) + 1;
     }
 
-    private void advanceTurn() {
-        turn++;
-
-        if (turn >= getPlayerCount()) {
-            turn = 0;
-        }
+    public int getBet() {
+        return bet;
     }
 
-    private int countCoins(final int amount) {
-        Random random = new Random();
-        int successes = 0;
-
-        for (int i = 0; i < amount; i++) {
-            if (random.nextBoolean()) {
-                successes++;
-            }
-        }
-
-        return successes;
+    public void setBet(int bet) {
+        this.bet = bet;
     }
 
-    private void pay(final Player player) {
-        final Player currentPlayer = getCurrentPlayer();
-
-        currentPlayer.setBalance(currentPlayer.getBalance() - bet);
-
-        player.setBalance(player.getBalance() + bet);
-
-        if (currentPlayer.isBroke()) {
-            removePlayerAndAdvance();
-        } else {
-            advanceTurn();
-        }
+    public int getTurn() {
+        return turn;
     }
 
-    private void payEveryone() {
-        for (Player player : players) {
-            if (!player.equals(getCurrentPlayer())) {
-                pay(player);
-            }
-        }
-    }
-
-    private void payEveryoneDouble() {
-        for (Player player : players) {
-            if (!player.equals(getCurrentPlayer())) {
-                for (int i = 0; i < 2; i++) {
-                    pay(player);
-                }
-            }
-        }
-    }
-
-    private void payEveryonePays() {
-        for (Player player : players) {
-            if (player.equals(getCurrentPlayer())) {
-                pay(getCurrentPlayer());
-            }
-        }
+    public Board getBoard() {
+        return board;
     }
 
 }
