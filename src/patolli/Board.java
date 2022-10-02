@@ -100,6 +100,7 @@ public class Board {
     public void insertToken(Token token, int position) {
         //Tambien podemos setearle al token su entrada en el juego (patolli) ya que nunca va a cambiar
         token.setInitialPosition(position);
+        token.setActualPosition(position);
         //En X posición agrega Y token
         spaces.get(position).insertToken(token);
     }

@@ -13,7 +13,7 @@ public class Player {
     private Color color; // color de jugador/fichas
     private ArrayList <Token> tokens; //Lista de tokens en partida, max 6
     private int bag; // Fondos del jugador para bet
-    private int currentToken;
+    private int currentToken = 0;
 
     public Player(String name, Color color, int bag) {
         this.name = name;

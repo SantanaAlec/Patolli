@@ -36,7 +36,6 @@ public class Token {
         this.initialPosition = position;
     }
 
-
     public Player getOwner() {
         return owner;
     }

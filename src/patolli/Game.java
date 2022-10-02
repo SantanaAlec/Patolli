@@ -51,10 +51,12 @@ public class Game {
     private static int turn = 0;
     private final Board board = Board.getInstance();
 
+    //Run corre el juego
     public void run() {
         init();
     }
 
+    //Inicializa el tablero
     private void init() {
         board.init();
     }
@@ -69,7 +71,7 @@ public class Game {
      *
      * @param apuesta
      */
-    public static void betting(int apuesta) {
+    public void betting(int apuesta) {
         setBet(apuesta); //betAmount = Integer.parseInt( betInput.getText());
 
         for (Player jugador : players) {
@@ -77,8 +79,10 @@ public class Game {
         }
     }
 
-    public static void addPlayer(Player jugador) {
+    public void addPlayer(Player jugador) {
         players.add(jugador);
+        //sout para ver que hace
+        System.out.println("Jugador: " + jugador.getName() + " Agregado");
     }
 
     private void removePlayer(final Player player) {
@@ -87,7 +91,7 @@ public class Game {
     }
 
     //Método que lanza los dados
-    public static int throwDice(final int throws_) {
+    public int throwDice(final int throws_) {
         Random random = new Random();
         int dadosTrue = 0;
 
@@ -102,35 +106,35 @@ public class Game {
         return dadosTrue;
     }
 
-    public static ArrayList<Player> getPlayers() {
+    public ArrayList<Player> getPlayers() {
         return players;
     }
 
-    public static void setPlayers(ArrayList<Player> players) {
+    public void setPlayers(ArrayList<Player> players) {
         Game.players = players;
     }
 
-    public static int getBet() {
+    public int getBet() {
         return bet;
     }
 
-    public static void setBet(int bet) {
+    public void setBet(int bet) {
         Game.bet = bet;
     }
 
-    public static int getBudget() {
+    public int getBudget() {
         return budget;
     }
 
-    public static void setBudget(int budget) {
+    public void setBudget(int budget) {
         Game.budget = budget;
     }
 
-    public static int getTokens() {
+    public int getTokens() {
         return tokens;
     }
 
-    public static void setTokens(int tokens) {
+    public void setTokens(int tokens) {
         Game.tokens = tokens;
     }
 
@@ -187,14 +191,17 @@ public class Game {
      */
     public void firstThrow(Player player) {
         //Establecer quien esta lanzando los dados
-        switch (Game.throwDice(5)) {
-
+        int coin = throwDice(5);
+        System.out.println("1er lanzada del jugador: " + player.getName() + " saco: " + coin);
+        switch (coin) {
             case 0 ->
                 advanceTurn();
             default -> {
                 Token tokeni = new Token(player, getCurrentPlayerStartPos());
                 board.insertToken(tokeni, getCurrentPlayerStartPos());
                 tokeni.getOwner().addToken(tokeni);
+                advanceTurn();
+                System.out.println("La ficha esta en la posición: " + tokeni.getInitialPosition());
             }
         }
     }
@@ -220,7 +227,8 @@ public class Game {
     public void moverToken(Token token) {
 //        Establecer quien esta lanzando los dados
 //FALTA: ESTABLECER QUE TIPO DE CASILLA CALLO, PARA PAGAR, ELIMINAR FICHA O REGRESARLA
-        switch (Game.throwDice(5)) {
+        int coin = throwDice(5);
+        switch (coin) {
             case 0 ->
                 payEveryoneDouble();
             case 1 -> {
@@ -268,6 +276,9 @@ public class Game {
             default ->
                 throw new AssertionError();
         }
+
+        System.out.println("La ficha del jugador: " + token.getOwner().getName() + " Se movera: " + coin + " Casillas");
+        System.out.println("La ficha esta en: " + token.getActualPosition());
     }
 
     /**
@@ -300,7 +311,7 @@ public class Game {
     }
 
     public Player getCurrentPlayer() {
-        return players.get(turn);
+        return players.get(turn-1);
     }
 
     private void pay(final Player player) {
@@ -323,7 +334,7 @@ public class Game {
     //Saber si un jugador se quedo sin dinero
     //Saber si aún tiene fichas para seguir metiendo al tablero
     //Seleccionar el token y pagar la apuesta a los demás jugadores por seleccionarlo
-    public void looser() {
+    public void losers() {
 
     }
 
