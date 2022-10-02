@@ -23,7 +23,8 @@ public class Game {
     /**
      * Singleton pattern to keep a single instance of this class program running
      *
-     * @return The instance of the program is returned, if there's none a new one is created
+     * @return The instance of the program is returned, if there's none a new
+     * one is created
      */
     public static Game getInstance() {
         if (instance == null) {
@@ -65,8 +66,8 @@ public class Game {
             return false;
         }
 
-        shufflePlayers();
-        board.init(4, 2);
+        //shufflePlayers();
+        board.init(3, 2);
 
         return true;
     }
@@ -131,7 +132,9 @@ public class Game {
 
         if (successes == 0) {
             // p a y
-            payEveryone();
+            if (getCurrentPlayer().hasTokensInPlay()) {
+                payEveryone();
+            }
             return;
         }
 
@@ -169,6 +172,57 @@ public class Game {
         }
 
         selectedToken.getOwner().selectNextToken();
+
+    }
+
+    public void playToken(final Token token, int successes) {
+
+        Token selectedToken = token;
+
+        if (successes == 0) {
+            // p a y
+            if (getCurrentPlayer().hasTokensInPlay()) {
+                payEveryone();
+            }
+            return;
+        }
+
+        if (selectedToken == null) {
+            if (playerHasFinished()) {
+                removePlayerAndAdvance();
+                return;
+            }
+
+            if (!getCurrentPlayer().hasTokensInPlay() && successes > 0) {
+                insertToken();
+                return;
+            }
+
+            if (!getCurrentPlayer().hasInsertedAllTokens() && successes == 1) {
+                insertToken();
+                return;
+            }
+
+            selectedToken = selectToken(getCurrentPlayer().getCurrentToken() + 1);
+        } else {
+            payEveryone();
+        }
+
+        final int nextPos = board.getTokenPos(selectedToken) + getSpacesToMove(successes);
+
+        final Space nextSpace = board.getSpace(nextPos);
+
+        if (board.willTokenFinish(selectedToken, nextPos)) {
+            removeTokenThatFinished(selectedToken);
+        } else if (tokenCanLandOnSpace(nextPos)) {
+            moveToken(selectedToken, nextSpace, nextPos);
+        } else {
+            landOnToken(selectedToken, nextSpace, nextPos);
+        }
+
+        selectedToken.getOwner().selectNextToken();
+
+        Console.WriteLine("al jugador: " + getCurrentPlayer().getName() + " Le queda en la bolsa: " + getCurrentPlayer().getBalance() + "          sdasdadssadsadasdsadsad");
     }
 
     private void removePlayerAndAdvance() {
@@ -274,6 +328,9 @@ public class Game {
                 pay(player);
             }
         }
+
+        Console.WriteLine("Jugador " + getCurrentPlayer().getName() + " Pago a los otros");
+        Console.WriteLine("al jugador: " + getCurrentPlayer().getName() + " Le queda en la bolsa: " + getCurrentPlayer().getBalance() + "--------------------------------------------------------------------------------------------------------");
 
         if (getCurrentPlayer().isBroke()) {
             removePlayerAndAdvance();

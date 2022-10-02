@@ -32,21 +32,23 @@ public class Main {
         }
         
         // Player 1 plays
-        game.playToken(null);
+        game.playToken(null, 3);
         
         // Player 2 plays
-        game.playToken(null);
+        game.playToken(null, 0);
         
         // Player 3 plays
-        game.playToken(null);
+        game.playToken(null , 2);
         
         // Player 4 plays
-        game.playToken(null);
+        game.playToken(null, 2);
         
         // Player 1 plays
-        game.playToken(null);
+        game.playToken(null, 2);
         
-        
+        for (Player player : players) {
+            System.out.println(player.getBalance() + " BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        }
     }
 
 }
