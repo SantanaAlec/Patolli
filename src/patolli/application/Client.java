@@ -8,8 +8,8 @@ import patolli.game.online.ClientManager;
 
 public class Client {
 
-    private static final String SERVER_IP = "localhost";
-    private static final int SERVER_PORT = 95;
+    private static final String SERVER_IP = "0.tcp.ngrok.io";
+    private static final int SERVER_PORT = 11291;
 
     /**
      * @param args the command line arguments

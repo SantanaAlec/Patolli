@@ -4,17 +4,19 @@
  */
 package patolli.game;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import patolli.game.online.server.threads.SocketThread;
 
 public class Leaderboard {
 
-    private List<SocketThread> clients;
+    private List<SocketThread> clients = Collections.synchronizedList(new ArrayList<>());;
 
     private SocketThread winner = null;
 
     public Leaderboard(List<SocketThread> players) {
-        this.clients = players;
+        clients.addAll(players);
     }
 
     public void updateWinner() {

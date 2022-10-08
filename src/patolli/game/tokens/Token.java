@@ -50,5 +50,5 @@ public class Token {
     public void setCurrentPos(final int currentPos) {
         this.currentPos = currentPos;
     }
-
+    
 }

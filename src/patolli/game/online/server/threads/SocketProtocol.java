@@ -289,8 +289,8 @@ public class SocketProtocol extends SocketThread {
                 return;
             }
 
-            SocketStreams.sendTo(getGroup(), getOuter().getPlayer().getName() + " left the channel");
-
+            SocketStreams.sendTo(getChannel(), getOuter().getPlayer().getName() + " left the channel");
+            
             getChannel().kick(getOuter());
         }
 
