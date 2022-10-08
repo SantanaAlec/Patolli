@@ -4,10 +4,11 @@
  */
 package patolli.game.spaces;
 
-/**
- *
- * @author Alec_
- */
-public class ExteriorSpace extends Space{
-    
+public class ExteriorSpace extends Space {
+
+    @Override
+    public String toString() {
+        return "ExteriorSpace";
+    }
+
 }

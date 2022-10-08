@@ -4,10 +4,11 @@
  */
 package patolli.game.spaces;
 
-/**
- *
- * @author Alec_
- */
-public class TriangleSpace extends Space{
-    
+public class TriangleSpace extends Space {
+
+    @Override
+    public String toString() {
+        return "TriangleSpace";
+    }
+
 }

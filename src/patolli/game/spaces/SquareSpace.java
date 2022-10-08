@@ -4,10 +4,11 @@
  */
 package patolli.game.spaces;
 
-/**
- *
- * @author Alec_
- */
-public class SquareSpace extends Space{
-    
+public class SquareSpace extends Space {
+
+    @Override
+    public String toString() {
+        return "SquareSpace";
+    }
+
 }

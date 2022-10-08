@@ -4,9 +4,11 @@
  */
 package patolli.game.spaces;
 
-/**
- *
- * @author Alec_
- */
-public class CentralSpace extends Space{
+public class CentralSpace extends Space {
+
+    @Override
+    public String toString() {
+        return "CentralSpace";
+    }
+
 }
