@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import patolli.game.Player;
 import patolli.game.online.server.threads.SocketThread;
-import patolli.game.utils.Console;
+import patolli.utils.Console;
 
 public class Pregame {
 
@@ -70,11 +70,14 @@ public class Pregame {
 
         private int maxTokens;
 
+        private int initialBalance;
+
         private final int DEFAULT_MAXPLAYERS = 4,
                 DEFAULT_SQUARES = 3,
                 DEFAULT_TRIANGLES = 2,
                 DEFAULT_BET = 5,
-                DEFAULT_MAXTOKENS = 3;
+                DEFAULT_MAXTOKENS = 3,
+                DEFAULT_INITIALBALANCE = 100;
 
         public Settings() {
             this.maxPlayers = DEFAULT_MAXPLAYERS;
@@ -82,19 +85,26 @@ public class Pregame {
             this.triangles = DEFAULT_TRIANGLES;
             this.bet = DEFAULT_BET;
             this.maxTokens = DEFAULT_MAXTOKENS;
+            this.initialBalance = DEFAULT_INITIALBALANCE;
         }
 
-        public Settings(int maxPlayers, int squares, int triangles, int bet, int maxTokens) {
+        public Settings(int maxPlayers, int squares, int triangles, int bet, int maxTokens, int initialBalance) {
             this.maxPlayers = maxPlayers;
             this.squares = squares;
             this.triangles = triangles;
             this.bet = bet;
             this.maxTokens = maxTokens;
+            this.initialBalance = initialBalance;
         }
 
         public boolean validate() {
             if (bet < 5) {
                 Console.WriteLine("Settings", "Bet has to be greater than 5 in order to play");
+                return false;
+            }
+
+            if (bet > (initialBalance / 3)) {
+                Console.WriteLine("Settings", "Bet has to be lower than 1/3 of balance in order to play");
                 return false;
             }
 
@@ -141,6 +151,14 @@ public class Pregame {
 
         public void setBet(int bet) {
             this.bet = bet;
+        }
+
+        public int getInitialBalance() {
+            return initialBalance;
+        }
+
+        public void setInitialBalance(int initialBalance) {
+            this.initialBalance = initialBalance;
         }
 
         public int getMaxTokens() {

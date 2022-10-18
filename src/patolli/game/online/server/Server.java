@@ -13,28 +13,28 @@ import java.util.List;
 import patolli.game.Player;
 import patolli.game.online.server.threads.SocketProtocol;
 import patolli.game.online.server.threads.SocketThread;
-import patolli.game.utils.Console;
+import patolli.utils.Console;
 
-public class ServerManager {
+public class Server {
 
     private final List<SocketThread> connections = Collections.synchronizedList(new ArrayList<>());
 
-    private final List<Group> lobbies = Collections.synchronizedList(new ArrayList<>());
+    private final List<Group> groups = Collections.synchronizedList(new ArrayList<>());
 
-    public int port;
+    private int port;
 
     private volatile boolean running = false;
 
-    private static ServerManager instance;
+    private static Server instance;
 
     /**
      * Singleton pattern to keep a single instance of this class program running
      *
      * @return The instance of the program is returned, if there's none a new one is created
      */
-    public static ServerManager getInstance() {
+    public static Server getInstance() {
         if (instance == null) {
-            instance = new ServerManager();
+            instance = new Server();
         }
 
         return instance;
@@ -43,7 +43,7 @@ public class ServerManager {
     /**
      *
      */
-    private ServerManager() {
+    private Server() {
     }
 
     /**
@@ -126,7 +126,7 @@ public class ServerManager {
      */
     public Group createGroup(final SocketThread client, final String name) {
         final Group group = new Group(client, name);
-        lobbies.add(group);
+        groups.add(group);
         return group;
     }
 
@@ -139,7 +139,7 @@ public class ServerManager {
      */
     public Group createGroup(final SocketThread client, final String name, final String password) {
         final Group group = new Group(client, name, password);
-        lobbies.add(group);
+        groups.add(group);
         return group;
     }
 
@@ -149,7 +149,7 @@ public class ServerManager {
      */
     public void removeGroup(final Group group) {
         group.destroy();
-        lobbies.remove(group);
+        groups.remove(group);
     }
 
     /**
@@ -173,7 +173,7 @@ public class ServerManager {
      * @return
      */
     public List<Group> getGroups() {
-        return lobbies;
+        return groups;
     }
 
 }

@@ -8,7 +8,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import patolli.game.tokens.Token;
 
 public class Player {
 
@@ -202,16 +201,9 @@ public class Player {
 
     public static class Balance {
 
-        private final int DEFAULT_BALANCE = 100;
-
-        private int balance;
+        private int balance = 0;
 
         public Balance() {
-            this.balance = DEFAULT_BALANCE;
-        }
-
-        public Balance(final int balance) {
-            this.balance = balance;
         }
 
         public int get() {
@@ -294,4 +286,5 @@ public class Player {
         }
 
     }
+
 }

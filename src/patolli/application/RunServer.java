@@ -4,24 +4,22 @@
  */
 package patolli.application;
 
-import patolli.game.online.ClientManager;
+import patolli.game.online.server.Server;
 
-public class Client {
+public class RunServer {
 
-    private static final String SERVER_IP = "0.tcp.ngrok.io";
-    private static final int SERVER_PORT = 11291;
+    private static final int PORT = 95;
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        final ClientManager client = ClientManager.getInstance();
+        final Server server = Server.getInstance();
 
-        client.setIp(SERVER_IP);
-        client.setPort(SERVER_PORT);
+        server.setPort(PORT);
 
-        if (!client.run()) {
+        if (!server.start()) {
             System.exit(1);
         }
     }

@@ -14,11 +14,11 @@ import patolli.game.online.server.threads.SocketThread;
 
 public class Channel extends Connection {
 
-    private Pregame pregame;
+    private final Group group;
+
+    private final Pregame pregame;
 
     private Game game;
-
-    private Group group;
 
     /**
      *
@@ -38,6 +38,7 @@ public class Channel extends Connection {
         client.setGroup(null);
 
         add(client);
+        this.operators.add(client);
         this.operators.addAll(operators);
     }
 
@@ -60,6 +61,7 @@ public class Channel extends Connection {
         client.setGroup(null);
 
         add(client);
+        this.operators.add(client);
         this.operators.addAll(operators);
     }
 
@@ -89,7 +91,6 @@ public class Channel extends Connection {
 
         if (game != null) {
             game.getPlayerlist().remove(client);
-            game.getPlayerlist().next();
         }
 
         if (clients.size() < 1) {
@@ -105,7 +106,12 @@ public class Channel extends Connection {
             SocketStreams.sendTo(this, "A game is already running in this channel");
             return;
         }
-
+        
+        for (SocketThread client : clients) {
+            client.getPlayer().getBalance().set(pregame.getSettings().getInitialBalance());
+        }
+        
+        
         pregame.getClients().addAll(clients);
 
         game = new Game(this);

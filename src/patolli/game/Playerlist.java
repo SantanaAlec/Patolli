@@ -11,7 +11,7 @@ import patolli.game.online.server.threads.SocketThread;
 
 public class Playerlist {
 
-    private Game game;
+    private final Game game;
 
     private final List<SocketThread> clients = Collections.synchronizedList(new ArrayList<>());
 
@@ -28,16 +28,15 @@ public class Playerlist {
 
     public void remove(final SocketThread client) {
         game.getBoard().removeTokensOf(client.getPlayer());
-        client.getPlayer().clearTokens();
-        clients.remove(client);
-    }
 
-    public void update() {
-        for (SocketThread client : clients) {
-            if (client.getPlayer().getBalance().isBroke()) {
-                remove(client);
-            }
+        if (client.getPlayer().getBalance().isBroke()) {
+            client.getPlayer().clearTokens();
         }
+
+        if (client.equals(getCurrent())) {
+            next();
+        }
+        clients.remove(client);
     }
 
     public SocketThread getCurrent() {

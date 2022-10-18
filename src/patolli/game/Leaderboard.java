@@ -11,12 +11,12 @@ import patolli.game.online.server.threads.SocketThread;
 
 public class Leaderboard {
 
-    private List<SocketThread> clients = Collections.synchronizedList(new ArrayList<>());;
+    private List<SocketThread> clients = Collections.synchronizedList(new ArrayList<>());
 
     private SocketThread winner = null;
 
-    public Leaderboard(List<SocketThread> players) {
-        clients.addAll(players);
+    public Leaderboard(final List<SocketThread> clients) {
+        this.clients.addAll(clients);
     }
 
     public void updateWinner() {
@@ -26,7 +26,7 @@ public class Leaderboard {
                     if (winner.getPlayer().finishedTokens() < client.getPlayer().finishedTokens()) {
                         winner = client;
                     } else if (winner.getPlayer().finishedTokens() == client.getPlayer().finishedTokens()) {
-                        if (winner.getPlayer().getBalance().compare(client.getPlayer()) > 0) {
+                        if (winner.getPlayer().getBalance().compare(client.getPlayer()) < 0) {
                             winner = client;
                         }
                     }

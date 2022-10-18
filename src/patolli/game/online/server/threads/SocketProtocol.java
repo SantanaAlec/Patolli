@@ -12,10 +12,10 @@ import patolli.game.Player;
 import patolli.game.online.ClientUtils;
 import patolli.game.online.server.Channel;
 import patolli.game.online.server.Group;
-import patolli.game.tokens.Token;
-import patolli.game.utils.Authentication;
-import patolli.game.utils.Console;
-import patolli.game.utils.StringUtils;
+import patolli.game.Token;
+import patolli.utils.Authentication;
+import patolli.utils.Console;
+import patolli.utils.StringUtils;
 
 public class SocketProtocol extends SocketThread {
 
@@ -171,6 +171,9 @@ public class SocketProtocol extends SocketThread {
             case "/setbet" -> {
                 pregameCommand.setBet(getSyntax(syntaxes, 1));
             }
+            case "/setbalance" -> {
+                pregameCommand.setBalance(getSyntax(syntaxes, 1));
+            }
             case "/setmaxtokens" -> {
                 pregameCommand.setMaxTokens(getSyntax(syntaxes, 1));
             }
@@ -251,6 +254,8 @@ public class SocketProtocol extends SocketThread {
             sb.append(", ");
             sb.append("/setbet");
             sb.append(", ");
+            sb.append("/setbalance");
+            sb.append(", ");
             sb.append("/setmaxtokens");
 
             sb.append("\n");
@@ -290,7 +295,7 @@ public class SocketProtocol extends SocketThread {
             }
 
             SocketStreams.sendTo(getChannel(), getOuter().getPlayer().getName() + " left the channel");
-            
+
             getChannel().kick(getOuter());
         }
 
@@ -811,7 +816,7 @@ public class SocketProtocol extends SocketThread {
             }
 
             if (!ClientUtils.isOperator(getChannel().getOperators(), getOuter())) {
-                SocketStreams.send(getOuter(), "Only an operator can stop the game");
+                SocketStreams.send(getOuter(), "Only an operator can modify the game");
                 return;
             }
 
@@ -835,6 +840,11 @@ public class SocketProtocol extends SocketThread {
 
             if (!StringUtils.isNumeric(string)) {
                 SocketStreams.send(getOuter(), "Argument is not valid");
+                return;
+            }
+
+            if (!ClientUtils.isOperator(getChannel().getOperators(), getOuter())) {
+                SocketStreams.send(getOuter(), "Only an operator can modify the game");
                 return;
             }
 
@@ -870,6 +880,11 @@ public class SocketProtocol extends SocketThread {
                 return;
             }
 
+            if (!ClientUtils.isOperator(getChannel().getOperators(), getOuter())) {
+                SocketStreams.send(getOuter(), "Only an operator can modify the game");
+                return;
+            }
+
             final int triangles = Integer.parseInt(string);
 
             if (triangles <= 0) {
@@ -902,6 +917,11 @@ public class SocketProtocol extends SocketThread {
                 return;
             }
 
+            if (!ClientUtils.isOperator(getChannel().getOperators(), getOuter())) {
+                SocketStreams.send(getOuter(), "Only an operator can modify the game");
+                return;
+            }
+
             final int bet = Integer.parseInt(string);
 
             if (bet < 0) {
@@ -912,6 +932,43 @@ public class SocketProtocol extends SocketThread {
             getChannel().getPregame().getSettings().setBet(bet);
 
             SocketStreams.sendTo(getChannel(), "Bet set to " + getChannel().getPregame().getSettings().getBet());
+        }
+
+        /**
+         *
+         * @param string
+         */
+        public void setBalance(final String string) {
+            if (getChannel() == null) {
+                SocketStreams.send(getOuter(), "You need to be in a channel to change game settings");
+                return;
+            }
+
+            if (string.isEmpty()) {
+                SocketStreams.send(getOuter(), "You need to set a valid balance");
+                return;
+            }
+
+            if (!StringUtils.isNumeric(string)) {
+                SocketStreams.send(getOuter(), "Argument is not valid");
+                return;
+            }
+
+            if (!ClientUtils.isOperator(getChannel().getOperators(), getOuter())) {
+                SocketStreams.send(getOuter(), "Only an operator can modify the game");
+                return;
+            }
+
+            final int balance = Integer.parseInt(string);
+
+            if (balance < 0) {
+                SocketStreams.send(getOuter(), "Balance must not be 0 and must be positive");
+                return;
+            }
+
+            getChannel().getPregame().getSettings().setInitialBalance(balance);
+
+            SocketStreams.sendTo(getChannel(), "Balance set to " + getChannel().getPregame().getSettings().getInitialBalance());
         }
 
         /**
@@ -931,6 +988,11 @@ public class SocketProtocol extends SocketThread {
 
             if (!StringUtils.isNumeric(string)) {
                 SocketStreams.send(getOuter(), "Argument is not valid");
+                return;
+            }
+
+            if (!ClientUtils.isOperator(getChannel().getOperators(), getOuter())) {
+                SocketStreams.send(getOuter(), "Only an operator can modify the game");
                 return;
             }
 
@@ -973,7 +1035,7 @@ public class SocketProtocol extends SocketThread {
                 return;
             }
 
-            if (getChannel().getGame().getCurrentClient().getPlayer() != getOuter().getPlayer()) {
+            if (getChannel().getGame().getPlayerlist().getCurrent().getPlayer() != getOuter().getPlayer()) {
                 SocketStreams.send(getOuter(), "It's not your turn");
                 return;
             }
