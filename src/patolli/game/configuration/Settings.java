@@ -7,94 +7,79 @@ package patolli.game.configuration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import patolli.game.Player;
-import patolli.game.online.server.threads.SocketThread;
+import patolli.game.online.PlayerSocket;
 import patolli.utils.Console;
 
-public class Pregame {
+public class Settings {
 
-    private final List<SocketThread> clients = Collections.synchronizedList(new ArrayList<>());
+    private final List<PlayerSocket> players = Collections.synchronizedList(new ArrayList<>());
 
-    private Settings settings;
+    private Preferences preferences;
 
-    public Pregame(Settings settings) {
-        this.settings = settings;
+    public Settings(Preferences preferences) {
+        this.preferences = preferences;
     }
 
-    public void add(final SocketThread client) {
-        clients.add(client);
+    public void add(final PlayerSocket player) {
+        players.add(player);
     }
 
-    public void add(final List<SocketThread> clients) {
-        this.clients.addAll(clients);
+    public void add(final List<PlayerSocket> players) {
+        this.players.addAll(players);
     }
 
-    public void remove(final SocketThread client) {
-        clients.remove(client);
+    public void remove(final PlayerSocket player) {
+        players.remove(player);
     }
 
     public void shuffle() {
-        Collections.shuffle(clients);
+        Collections.shuffle(players);
     }
 
-    public Settings getSettings() {
-        return settings;
+    public Preferences getPreferences() {
+        return preferences;
     }
 
-    public void setSettings(Settings settings) {
-        this.settings = settings;
+    public void setPreferences(Preferences preferences) {
+        this.preferences = preferences;
     }
 
-    public List<SocketThread> getClients() {
-        return clients;
+    public List<PlayerSocket> getPlayers() {
+        return Collections.unmodifiableList(players);
     }
 
-    public ArrayList<Player> getPlayers() {
-        final ArrayList<Player> players = new ArrayList<>();
-        for (SocketThread client : clients) {
-            players.add(client.getPlayer());
-        }
-
-        return players;
-    }
-
-    public static class Settings {
+    public static class Preferences {
 
         private int maxPlayers;
 
         private int squares;
 
-        private int triangles;
-
         private int bet;
 
         private int maxTokens;
 
-        private int initialBalance;
+        private int initBalance;
 
         private final int DEFAULT_MAXPLAYERS = 4,
                 DEFAULT_SQUARES = 3,
-                DEFAULT_TRIANGLES = 2,
                 DEFAULT_BET = 5,
                 DEFAULT_MAXTOKENS = 3,
-                DEFAULT_INITIALBALANCE = 100;
+                DEFAULT_INITBALANCE = 100;
 
-        public Settings() {
+        public Preferences() {
             this.maxPlayers = DEFAULT_MAXPLAYERS;
             this.squares = DEFAULT_SQUARES;
-            this.triangles = DEFAULT_TRIANGLES;
             this.bet = DEFAULT_BET;
             this.maxTokens = DEFAULT_MAXTOKENS;
-            this.initialBalance = DEFAULT_INITIALBALANCE;
+            this.initBalance = DEFAULT_INITBALANCE;
         }
 
-        public Settings(int maxPlayers, int squares, int triangles, int bet, int maxTokens, int initialBalance) {
+        public Preferences(int maxPlayers, int squares, int triangles, int bet, int maxTokens, int initBalance) {
             this.maxPlayers = maxPlayers;
             this.squares = squares;
-            this.triangles = triangles;
             this.bet = bet;
             this.maxTokens = maxTokens;
-            this.initialBalance = initialBalance;
+            this.initBalance = DEFAULT_INITBALANCE;
         }
 
         public boolean validate() {
@@ -103,8 +88,8 @@ public class Pregame {
                 return false;
             }
 
-            if (bet > (initialBalance / 3)) {
-                Console.WriteLine("Settings", "Bet has to be lower than 1/3 of balance in order to play");
+            if (bet > initBalance / 3) {
+                Console.WriteLine("Settings", "Bet too big");
                 return false;
             }
 
@@ -137,28 +122,12 @@ public class Pregame {
             this.squares = squares;
         }
 
-        public int getTriangles() {
-            return triangles;
-        }
-
-        public void setTriangles(int triangles) {
-            this.triangles = triangles;
-        }
-
         public int getBet() {
             return bet;
         }
 
         public void setBet(int bet) {
             this.bet = bet;
-        }
-
-        public int getInitialBalance() {
-            return initialBalance;
-        }
-
-        public void setInitialBalance(int initialBalance) {
-            this.initialBalance = initialBalance;
         }
 
         public int getMaxTokens() {
@@ -169,13 +138,20 @@ public class Pregame {
             this.maxTokens = maxTokens;
         }
 
+        public int getInitBalance() {
+            return initBalance;
+        }
+
+        public void setInitBalance(int initBalance) {
+            this.initBalance = initBalance;
+        }
+
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append("Settings{");
             sb.append("maxPlayers=").append(maxPlayers);
             sb.append(", squares=").append(squares);
-            sb.append(", triangles=").append(triangles);
             sb.append(", bet=").append(bet);
             sb.append(", maxTokens=").append(maxTokens);
             sb.append('}');

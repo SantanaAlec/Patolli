@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package patolli.game.online.server.threads;
+package patolli.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,11 +12,11 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import patolli.game.online.IClientSocket;
 import patolli.game.online.server.Channel;
 import patolli.game.online.server.Group;
-import patolli.utils.Console;
 
-public final class SocketStreams {
+public final class SocketHelper {
 
     /**
      *
@@ -24,45 +24,46 @@ public final class SocketStreams {
      * @return
      * @throws IOException
      */
-    public static byte[] readBytes(final DataInputStream dis) throws IOException {
+    public static byte[] readBytes(final DataInputStream dis, byte[] key) throws IOException {
         int len = dis.readInt();
         byte[] data = new byte[len];
         if (len > 0) {
             dis.readFully(data);
         }
-        return data;
+        return TinkHelper.decryptBytes(data, key);
     }
 
     /**
      *
      * @param dos
-     * @param myByteArray
+     * @param data
      * @throws IOException
      */
-    public static void sendBytes(final DataOutputStream dos, final byte[] myByteArray) throws IOException {
-        sendBytes(dos, myByteArray, 0, myByteArray.length);
+    public static void sendBytes(DataOutputStream dos, byte[] data, byte[] key) throws IOException {
+        byte[] bytes = TinkHelper.encryptBytes(data, key);
+        sendBytes(dos, bytes, 0, bytes.length);
     }
 
     /**
      *
      * @param dos
-     * @param myByteArray
+     * @param data
      * @param start
      * @param len
      * @throws IOException
      */
-    public static void sendBytes(final DataOutputStream dos, final byte[] myByteArray, final int start, final int len) throws IOException {
+    public static void sendBytes(final DataOutputStream dos, final byte[] data, final int start, final int len) throws IOException {
         if (len < 0) {
             throw new IllegalArgumentException("Negative length not allowed");
         }
-        if (start < 0 || start >= myByteArray.length) {
+        if (start < 0 || start >= data.length) {
             throw new IndexOutOfBoundsException("Out of bounds: " + start);
         }
         // Other checks if needed.
 
         dos.writeInt(len);
         if (len > 0) {
-            dos.write(myByteArray, start, len);
+            dos.write(data, start, len);
         }
     }
 
@@ -100,19 +101,18 @@ public final class SocketStreams {
      * @param object
      * @throws IOException
      */
-    public static void sendObject(final DataOutputStream dos, final Object object) throws IOException {
-        sendBytes(dos, readObjectBytes(object));
+    public static void sendObject(final IClientSocket client, final Object object) throws IOException {
+        send(client, readObjectBytes(object));
     }
 
     /**
      *
-     * @param client
+     * @param socket
      * @param message
      */
-    public static void send(final SocketThread client, final byte[] message) {
+    public static void send(final IClientSocket client, final byte[] message) {
         try {
-            Console.WriteLine("SocketStreams/" + client.getPlayer().getName(), new String(message));
-            sendBytes(client.getOutput(), message);
+            sendBytes(client.getDos(), message, client.getKey());
         } catch (IOException ex) {
         }
     }
@@ -123,7 +123,7 @@ public final class SocketStreams {
      * @param message
      */
     public static void sendTo(final Channel channel, final byte[] message) {
-        for (SocketThread client : channel.getClients()) {
+        for (IClientSocket client : channel.getClients()) {
             send(client, message);
         }
     }
@@ -134,7 +134,7 @@ public final class SocketStreams {
      * @param message
      */
     public static void sendTo(final Group group, final byte[] message) {
-        for (SocketThread client : group.getClients()) {
+        for (IClientSocket client : group.getClients()) {
             if (client.getChannel() == null) {
                 send(client, message);
             }
@@ -146,7 +146,7 @@ public final class SocketStreams {
      * @param client
      * @param message
      */
-    public static void send(final SocketThread client, final String message) {
+    public static void send(final IClientSocket client, final String message) {
         send(client, message.getBytes());
     }
 
@@ -166,6 +166,9 @@ public final class SocketStreams {
      */
     public static void sendTo(final Group group, final String message) {
         sendTo(group, message.getBytes());
+    }
+
+    private SocketHelper() {
     }
 
 }

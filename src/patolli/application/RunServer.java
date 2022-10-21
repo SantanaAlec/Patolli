@@ -15,10 +15,8 @@ public class RunServer {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        final Server server = Server.getInstance();
-
+        Server server = Server.getInstance();
         server.setPort(PORT);
-
         if (!server.start()) {
             System.exit(1);
         }
