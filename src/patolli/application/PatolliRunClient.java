@@ -4,20 +4,20 @@
  */
 package patolli.application;
 
-import patolli.game.online.Client;
+import dradacorus.online.kobold.KoboldClient;
 
-public class RunClient {
+public class PatolliRunClient {
 
     private static final String SERVER_IP = "localhost";
-    private static final int SERVER_PORT = 95;
-    private static String[] testArgs = {"/setname Alec", "/creategroup p" , "/createchannel p"};
+    private static final int SERVER_PORT = 1001;
+    private static String[] testArgs = {};
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        Client client = Client.getInstance();
+        KoboldClient client = new KoboldClient();
 
         client.setIp(SERVER_IP);
         client.setPort(SERVER_PORT);
