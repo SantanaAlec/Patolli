@@ -4,9 +4,9 @@
  */
 package patolli.game.online.server;
 
-import dradacorus.online.dragon.IDragonServer;
-import dradacorus.online.kobold.IKoboldSocket;
-import dradacorus.online.server.lairs.Lair;
+import dradacorus.online.ExtendableLair;
+import dradacorus.online.IDragonServer;
+import dradacorus.online.IKoboldSocket;
 import dradacorus.online.utils.SocketHelper;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,27 +14,28 @@ import patolli.game.Game;
 import patolli.game.InvalidSettingsException;
 import patolli.game.online.client.PlayerSocket;
 
-public class GameLair extends Lair {
+public class GameLair extends ExtendableLair {
 
     private Game game;
+    private boolean running = false;
 
     public GameLair(IDragonServer dragon, String name) {
         super(dragon, name);
+        game = new Game(this);
     }
 
     public GameLair(IDragonServer dragon, String name, String password) {
         super(dragon, name, password);
+        game = new Game(this);
     }
 
     public void startGame() {
-        if (game != null) {
-            SocketHelper.Output.sendTo(this, "A game is already running in this lair");
+        if (running) {
+            SocketHelper.Output.sendTo(this, "There´s already a game in this lair");
             return;
         }
 
         List<PlayerSocket> players = new ArrayList<>();
-
-        game = new Game(this);
 
         for (int i = 0; i < game.getPreferences().getMaxPlayers() && i < getKobolds().size(); i++) {
             players.add((PlayerSocket) getKobolds().get(i));
@@ -54,27 +55,36 @@ public class GameLair extends Lair {
         }
 
         if (!game.init()) {
-            game = null;
+            SocketHelper.Output.sendTo(this, "Failed at creating game");
         }
     }
 
     public void stopGame() {
-        if (game == null) {
-            SocketHelper.Output.sendTo(this, "No game is running");
+        if (!running) {
+            SocketHelper.Output.sendTo(this, "There´s no game in this lair");
             return;
         }
-
-        game = null;
+        game = new Game(this);
         SocketHelper.Output.sendTo(this, "Game has stopped");
+        running = false;
+
     }
 
     public Game getGame() {
         return game;
     }
 
+    public boolean isRunning() {
+        return running;
+    }
+
+    public void setRunning(boolean running) {
+        this.running = running;
+    }
+
     @Override
     public void kick(IKoboldSocket client) {
-        if (game != null) {
+        if (game.getGameLayer().isRunning()) {
             game.getPlayerlist().remove((PlayerSocket) client);
         }
 

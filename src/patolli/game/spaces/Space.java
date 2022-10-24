@@ -35,11 +35,11 @@ public abstract class Space {
     }
 
     public boolean hasNoTokens() {
-        return !tokens.isEmpty();
+        return tokens.isEmpty();
     }
 
     public Player getOwner() {
-        if (hasNoTokens()) {
+        if (!hasNoTokens()) {
             return tokens.get(0).getOwner();
         }
 

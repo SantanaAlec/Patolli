@@ -101,7 +101,7 @@ public class Board {
     }
 
     public boolean willTokenCollideWithAnother(Player player, int pos) {
-        return getSpace(pos).getOwner() != null || getSpace(pos).getOwner() != player;
+        return getSpace(pos).getOwner() != null && getSpace(pos).getOwner() != player;
     }
 
     public boolean willTokenFinish(final Token token, final int nextPos) {

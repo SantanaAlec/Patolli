@@ -17,6 +17,7 @@ import patolli.game.spaces.TriangleSpace;
 
 public class Game {
 
+    // where the game is taking place at
     private final GameLair gameLayer;
 
     private final Settings settings = new Settings(new Preferences());
@@ -50,6 +51,9 @@ public class Game {
         leaderboard = new Leaderboard(settings.getPlayers());
 
         SocketHelper.Output.sendTo(gameLayer, "Game has started! It is now player " + getCurrentPlayer().getName() + "'s turn");
+
+        gameLayer.setRunning(true);
+
         return true;
     }
 
@@ -59,8 +63,8 @@ public class Game {
             return;
         }
 
-        getCurrentPlayer().getDice().nextOutcome();
-        SocketHelper.Output.sendTo(gameLayer, "Player " + getCurrentPlayer().getName() + " got " + getCurrentPlayer().getDice().getResult() + " after throwing the dice and can move " + getCurrentPlayer().getDice().getOutcome() + " spaces");
+        getCurrentPlayer().getPlayer().getDice().nextOutcome();
+        SocketHelper.Output.sendTo(gameLayer, "Player " + getCurrentPlayer().getName() + " got " + getCurrentPlayer().getPlayer().getDice().getResult() + " after throwing the dice and can move " + getCurrentPlayer().getPlayer().getDice().getOutcome() + " spaces");
 
         if (analizeOutcome(token)) {
             playToken(token);
@@ -71,10 +75,10 @@ public class Game {
     }
 
     private boolean analizeOutcome(Token token) {
-        int outcome = getCurrentPlayer().getDice().getOutcome();
+        int outcome = getCurrentPlayer().getPlayer().getDice().getOutcome();
 
         if (outcome == 0) {
-            if (getCurrentPlayer().tokensInPlay() != 0) {
+            if (getCurrentPlayer().getPlayer().tokensInPlay() != 0) {
                 SocketHelper.Output.sendTo(gameLayer, "Player " + getCurrentPlayer().getName() + " is unable to move any tokens");
                 payEveryone(getPreferences().getBet(), playerlist.getCurrent(), playerlist.getPlayers());
             } else {
@@ -83,8 +87,8 @@ public class Game {
             return false;
         }
 
-        if (getCurrentPlayer().tokenCount() < getPreferences().getMaxTokens()) {
-            if (getCurrentPlayer().tokensInPlay() == 0 || (token == null && outcome == 1)) {
+        if (getCurrentPlayer().getPlayer().tokenCount() < getPreferences().getMaxTokens()) {
+            if (getCurrentPlayer().getPlayer().tokensInPlay() == 0 || (token == null && outcome == 1)) {
                 insertToken();
                 return false;
             }
@@ -97,21 +101,24 @@ public class Game {
         Token selectedToken = token;
 
         if (selectedToken == null) {
-            selectedToken = getCurrentPlayer().getCurrentToken();
+            selectedToken = getCurrentPlayer().getPlayer().getCurrentToken();
         } else {
-            if (!selectedToken.equals(getCurrentPlayer().getCurrentToken())) {
-                if (getCurrentPlayer().getBalance().get() >= getPreferences().getBet() * playerlist.getPlayers().size()) {
+            if (!selectedToken.equals(getCurrentPlayer().getPlayer().getCurrentToken())) {
+                if (getCurrentPlayer().getPlayer().getBalance().get() >= getPreferences().getBet() * playerlist.getPlayers().size()) {
                     SocketHelper.Output.sendTo(gameLayer, "Player " + getCurrentPlayer().getName() + " pays " + getPreferences().getBet() + " to move token " + selectedToken.getIndex() + " at position " + selectedToken.getPosition());
                     payEveryone(getPreferences().getBet(), playerlist.getCurrent(), playerlist.getPlayers());
                 } else {
                     SocketHelper.Output.send(playerlist.getCurrent(), "Your balance is too low to select a token");
-                    selectedToken = getCurrentPlayer().getCurrentToken();
+                    selectedToken = getCurrentPlayer().getPlayer().getCurrentToken();
                 }
             }
         }
 
-        int nextPos = selectedToken.getPosition() + getCurrentPlayer().getDice().getOutcome();
+        int nextPos = selectedToken.getPosition() + getCurrentPlayer().getPlayer().getDice().getOutcome();
         moveToken(selectedToken, nextPos);
+        if (gameHasEnded()) {
+            gameLayer.stopGame();
+        }
     }
 
     private void moveToken(Token token, int nextPos) {
@@ -122,7 +129,7 @@ public class Game {
 
             token.markAsFinished();
             everyonePays(settings.getPreferences().getBet(), playerlist.getPlayers(), playerlist.getCurrent());
-            getCurrentPlayer().selectNextToken();
+            getCurrentPlayer().getPlayer().selectNextToken();
             board.removeToken(token);
             return;
         }
@@ -141,7 +148,7 @@ public class Game {
                 SocketHelper.Output.sendTo(gameLayer, "Player " + getCurrentPlayer().getName() + " returns to previous position");
             }
 
-            getCurrentPlayer().selectNextToken();
+            getCurrentPlayer().getPlayer().selectNextToken();
         } else {
             board.moveToken(token, nextPos);
             SocketHelper.Output.sendTo(gameLayer, "Token " + token.getIndex() + " of player " + getCurrentPlayer().getName() + " moves to space at position " + token.getPosition());
@@ -152,19 +159,19 @@ public class Game {
             } else if (nextSpace instanceof TriangleSpace) {
                 SocketHelper.Output.sendTo(gameLayer, "Player " + getCurrentPlayer().getName() + " landed on an triangle space");
                 payEveryone(getPreferences().getBet() * 2, playerlist.getCurrent(), playerlist.getPlayers());
-                getCurrentPlayer().selectNextToken();
+                getCurrentPlayer().getPlayer().selectNextToken();
             } else {
-                getCurrentPlayer().selectNextToken();
+                getCurrentPlayer().getPlayer().selectNextToken();
             }
         }
     }
 
     private void insertToken() {
-        Token token = getCurrentPlayer().createToken(board.calculateTokenStartPos(playerlist.getTurn()));
+        Token token = getCurrentPlayer().getPlayer().createToken(board.calculateTokenStartPos(playerlist.getTurn()));
         board.insertToken(token, token.getInitialPos());
 
         SocketHelper.Output.sendTo(gameLayer, "Inserted token " + token.getIndex() + " in board for player " + getCurrentPlayer().getName() + " at position " + token.getInitialPos());
-        getCurrentPlayer().selectNextToken();
+        getCurrentPlayer().getPlayer().selectNextToken();
     }
 
     public boolean checkIfPlayerCanContinue(final PlayerSocket player) {
@@ -197,15 +204,15 @@ public class Game {
     }
 
     public void pay(final int amount, final PlayerSocket from, final PlayerSocket to) {
-        SocketHelper.Output.sendTo(gameLayer, "Player " + from.getPlayer().getName() + " pays " + amount + " to player " + to.getPlayer().getName());
+        SocketHelper.Output.sendTo(gameLayer, "Player " + from.getName() + " pays " + amount + " to player " + to.getName());
 
         from.getPlayer().getBalance().take(amount);
         to.getPlayer().getBalance().give(amount);
-        SocketHelper.Output.sendTo(gameLayer, "Player " + from.getPlayer().getName() + ":  " + from.getPlayer().getBalance() + " | Player " + to.getPlayer().getName() + ": " + to.getPlayer().getBalance());
+        SocketHelper.Output.sendTo(gameLayer, "Player " + from.getName() + ":  " + from.getPlayer().getBalance() + " | Player " + to.getName() + ": " + to.getPlayer().getBalance());
     }
 
     public void payEveryone(final int amount, final PlayerSocket from, final List<PlayerSocket> to) {
-        SocketHelper.Output.sendTo(gameLayer, "Player " + from.getPlayer().getName() + " pays " + amount + " to everyone");
+        SocketHelper.Output.sendTo(gameLayer, "Player " + from.getName() + " pays " + amount + " to everyone");
 
         for (PlayerSocket player : to) {
             if (!player.equals(from)) {
@@ -214,8 +221,8 @@ public class Game {
         }
 
         if (checkIfPlayerCanContinue(playerlist.getCurrent())) {
-            getCurrentPlayer().selectNextToken();
-            SocketHelper.Output.sendTo(gameLayer, "Selecting token " + getCurrentPlayer().getCurrentToken().getIndex() + " of player " + getCurrentPlayer().getName());
+            getCurrentPlayer().getPlayer().selectNextToken();
+            SocketHelper.Output.sendTo(gameLayer, "Selecting token " + getCurrentPlayer().getPlayer().getCurrentToken().getIndex() + " of player " + getCurrentPlayer().getName());
         }
     }
 
@@ -229,13 +236,13 @@ public class Game {
         }
 
         if (checkIfPlayerCanContinue(playerlist.getCurrent())) {
-            getCurrentPlayer().selectNextToken();
-            SocketHelper.Output.sendTo(gameLayer, "Selecting token " + getCurrentPlayer().getCurrentToken().getIndex() + " of player " + getCurrentPlayer().getName());
+            getCurrentPlayer().getPlayer().selectNextToken();
+            SocketHelper.Output.sendTo(gameLayer, "Selecting token " + getCurrentPlayer().getPlayer().getCurrentToken().getIndex() + " of player " + getCurrentPlayer().getName());
         }
     }
 
-    private Player getCurrentPlayer() {
-        return playerlist.getCurrent().getPlayer();
+    private PlayerSocket getCurrentPlayer() {
+        return playerlist.getCurrent();
     }
 
     public Settings getSettings() {
