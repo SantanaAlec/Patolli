@@ -13,3 +13,8 @@
 
 * Al mover un token, la colisión de tokens siempre se cumplía (El if del hasNoToken estaba invertido)
 	* Quitamos la inversión (tenían un ! al inicio) de dos condicionales, del HasNoToken y del willTokenColideWithAnother de || a &&
+
+
+##Parte gráfica
+
+*Puede bloquear el hilo a la hora de crear el cliente en el main(Por culpa de la ip del ngrok)
