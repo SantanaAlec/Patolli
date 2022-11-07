@@ -4,8 +4,8 @@
  */
 package patolli.game.views;
 
-import java.awt.BorderLayout;
 import net.kaw.dradacorus.online.KoboldClient;
+import patolli.game.views.pantallas.MasterPane;
 
 /**
  *
@@ -17,16 +17,18 @@ public class MainFrame extends javax.swing.JFrame {
     private static final int SERVER_PORT = 1001;
     private static final String[] ARGS = {};
     private static KoboldClient client;
-    
 
     /**
      * Creates new form MainFrame
      */
     public MainFrame() {
-        initComponents();
-        MainComponentes componentes = new MainComponentes();
-        this.add(componentes.getGUI());
+        //initComponents();
+
+        //Centrar ventana
+
+        this.add(new MasterPane());
         this.pack();
+        this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
 
@@ -40,16 +42,18 @@ public class MainFrame extends javax.swing.JFrame {
     private void initComponents() {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(800, 500));
+        setSize(new java.awt.Dimension(800, 500));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGap(0, 840, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGap(0, 500, Short.MAX_VALUE)
         );
 
         pack();
@@ -59,9 +63,8 @@ public class MainFrame extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        
-        conectarCliente();
-        
+
+        //conectarCliente();
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -92,8 +95,8 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
     }
-    
-        private static void conectarCliente() {
+
+    private static void conectarCliente() {
         client = new KoboldClient(SERVER_IP, SERVER_PORT);
 
         Thread hilo = new Thread(() -> {
@@ -103,8 +106,8 @@ public class MainFrame extends javax.swing.JFrame {
         });
         hilo.start();
     }
-        
-    public static KoboldClient getClient(){
+
+    public static KoboldClient getClient() {
         return client;
     }
 
